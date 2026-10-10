@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, Field
 from app.schemas.account import AccountTarget
 
@@ -11,21 +11,34 @@ class CollectorSource(str, Enum):
     PLAYWRIGHT = "playwright"
 
 
+class CollectorCapability(str, Enum):
+    PROFILE_METADATA = "profile_metadata"
+    POST_METADATA = "post_metadata"
+    MEDIA_METADATA = "media_metadata"
+    BROWSER_RENDER = "browser_render"
+
+
 class DataSourceExecutionStatus(str, Enum):
     PENDING = "pending"
-    NOT_IMPLEMENTED = "not_implemented"
+    RUNNING = "running"
     SUCCESS = "success"
     PARTIAL = "partial"
     FAILED = "failed"
     SKIPPED = "skipped"
+    UNAVAILABLE = "unavailable"
+    TIMED_OUT = "timed_out"
 
 
 class DataSourceStatus(BaseModel):
     source: CollectorSource
-    status: DataSourceExecutionStatus = DataSourceExecutionStatus.NOT_IMPLEMENTED
+    status: DataSourceExecutionStatus = DataSourceExecutionStatus.PENDING
+    duration_ms: Optional[float] = None
+    capabilities_attempted: List[CollectorCapability] = Field(default_factory=list)
     collected_field_names: List[str] = Field(default_factory=list)
     missing_field_names: List[str] = Field(default_factory=list)
     error_code: Optional[str] = None
+    error_message: Optional[str] = None
+    retryable: bool = False
     collection_timestamp: Optional[datetime] = None
 
 
@@ -41,6 +54,7 @@ class AccountObservation(BaseModel):
     following_count: Optional[int] = None
     has_profile_pic: Optional[bool] = None
     external_url: Optional[str] = None
+    raw_metadata_sample: Optional[Dict[str, Any]] = None
     observation_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     source_provenance: CollectorSource
     completeness_score: Optional[float] = Field(
@@ -54,6 +68,7 @@ class OverallCollectionStatus(str, Enum):
     COMPLETED = "completed"
     PARTIAL = "partial"
     FAILED = "failed"
+    TIMED_OUT = "timed_out"
 
 
 class CollectionResult(BaseModel):
@@ -65,3 +80,4 @@ class CollectionResult(BaseModel):
     missing_data_summary: List[str] = Field(default_factory=list)
     error_message: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    completed_at: Optional[datetime] = None

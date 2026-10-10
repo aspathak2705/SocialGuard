@@ -14,6 +14,15 @@ class Settings(BaseSettings):
         default=["http://localhost:5173", "http://127.0.0.1:5173"]
     )
 
+    # Collector Configurations
+    COLLECTOR_INSTALOADER_ENABLED: bool = True
+    COLLECTOR_GALLERY_DL_ENABLED: bool = True
+    COLLECTOR_PLAYWRIGHT_ENABLED: bool = True
+
+    COLLECTOR_TIMEOUT_SECONDS: float = 12.0
+    OVERALL_ACQUISITION_TIMEOUT_SECONDS: float = 25.0
+    MAX_CONCURRENT_COLLECTORS: int = 3
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

@@ -35,19 +35,20 @@ async def get_health() -> HealthResponse:
 @router.get("/ready", response_model=ReadinessResponse)
 async def get_readiness() -> ReadinessResponse:
     """
-    Readiness probe indicating if Phase 1 application foundation is operational.
-    Reports actual status: core foundation ready, collectors & ML intentionally uninitialized.
+    Readiness probe indicating application status.
+    Reports Phase 2 multi-source collectors initialized and ready.
     """
     return ReadinessResponse(
         status="ready",
         ready=True,
-        phase="Phase 1: Project Foundation & Architecture",
+        phase="Phase 2: Modular Data Acquisition & Orchestration",
         subsystems={
             "api_foundation": "ready",
             "account_validation": "ready",
-            "collectors": "planned_phase_2",
+            "collectors": "ready_phase_2",
+            "orchestrator": "ready_phase_2",
             "feature_pipeline": "planned_phase_3",
             "ml_inference": "planned_phase_4",
-            "database": "uninitialized_stateless_phase_1",
+            "database": "uninitialized_stateless",
         },
     )
