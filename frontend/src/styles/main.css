@@ -1,22 +1,34 @@
 :root {
-  --bg-color: #f8fafc;
-  --card-bg: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-light: #eff6ff;
-  --border: #e2e8f0;
-  --success-bg: #f0fdf4;
-  --success-border: #bbf7d0;
-  --success-text: #166534;
-  --error-bg: #fef2f2;
-  --error-border: #fecaca;
-  --error-text: #991b1b;
-  --warning-bg: #fffbeb;
-  --warning-border: #fef3c7;
-  --warning-text: #92400e;
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Neo-Brutalist Color Palette */
+  --bg-main: #F7F6F2;
+  --text-main: #080808;
+  --text-muted: #525252;
+  --border-color: #080808;
+
+  --color-lime: #C6FF4D;
+  --color-pink: #FF789F;
+  --color-purple: #7545F5;
+  --color-white: #FFFFFF;
+  --color-offwhite: #EFEFE9;
+
+  /* Metric & status accents */
+  --color-amber: #FFB800;
+  --color-cyan: #00F0FF;
+
+  /* Borders & Shadows */
+  --border-thick: 3px solid var(--border-color);
+  --border-thin: 2px solid var(--border-color);
+  --shadow-hard: 4px 4px 0px var(--border-color);
+  --shadow-hard-lg: 6px 6px 0px var(--border-color);
+  --shadow-hard-sm: 2px 2px 0px var(--border-color);
+
+  /* Typography */
+  --font-display: 'Impact', 'Arial Black', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Grid pattern */
+  --grid-line-color: rgba(8, 8, 8, 0.08);
 }
 
 * {
@@ -26,169 +38,897 @@
 }
 
 body {
-  font-family: var(--font-family);
-  background-color: var(--bg-color);
+  font-family: var(--font-sans);
+  background-color: var(--bg-main);
   color: var(--text-main);
-  line-height: 1.5;
+  line-height: 1.4;
   -webkit-font-smoothing: antialiased;
+  padding: 12px;
 }
 
-.app-container {
-  max-width: 780px;
+/* Page Frame */
+.neo-page-container {
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 2.5rem 1.5rem;
+  border: var(--border-thick);
+  background-color: var(--color-white);
+  box-shadow: var(--shadow-hard-lg);
+  overflow: hidden;
 }
 
-.header {
-  margin-bottom: 2rem;
-  text-align: center;
+/* 1. Header / Navbar */
+.neo-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: var(--border-thick);
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-white);
+  gap: 1rem;
 }
 
-.brand-badge {
-  display: inline-block;
-  font-size: 0.75rem;
+.neo-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.neo-brand-badge {
+  background-color: var(--color-lime);
+  border: var(--border-thin);
+  padding: 0.15rem 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-hard-sm);
+}
+
+.neo-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  list-style: none;
+}
+
+.neo-nav-link {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background-color: var(--primary-light);
-  color: var(--primary);
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  margin-bottom: 0.75rem;
-}
-
-.header h1 {
-  font-size: 2rem;
-  font-weight: 800;
+  text-decoration: none;
   color: var(--text-main);
-  margin-bottom: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  border: 2px solid transparent;
+  transition: all 0.1s ease;
 }
 
-.header p {
-  color: var(--text-muted);
-  font-size: 1rem;
-  max-width: 580px;
-  margin: 0 auto;
+.neo-nav-link:hover {
+  background-color: var(--color-lime);
+  border: var(--border-thin);
+  box-shadow: var(--shadow-hard-sm);
 }
 
-.card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  margin-bottom: 1.5rem;
+.neo-nav-cta {
+  background-color: var(--color-purple);
+  color: var(--color-white);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.5rem 1.1rem;
+  border: var(--border-thin);
+  box-shadow: var(--shadow-hard-sm);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
-.form-group {
+.neo-nav-cta:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-hard);
+}
+
+/* 2. Hero Section (Asymmetric Split) */
+.neo-hero-split {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  border-bottom: var(--border-thick);
+}
+
+/* Hero Left */
+.neo-hero-left {
+  padding: 3rem 2.5rem;
+  border-right: var(--border-thick);
+  background-color: var(--bg-main);
+  background-image: 
+    linear-gradient(var(--grid-line-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line-color) 1px, transparent 1px);
+  background-size: 24px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.neo-eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  background-color: var(--color-lime);
+  border: var(--border-thin);
+  padding: 0.25rem 0.75rem;
+  box-shadow: var(--shadow-hard-sm);
   margin-bottom: 1.25rem;
 }
 
-.form-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 600;
+.neo-hero-headline {
+  font-family: var(--font-display);
+  font-size: 3.5rem;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+}
+
+.neo-hero-subtext {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 540px;
+  margin-bottom: 2rem;
+  font-weight: 500;
+}
+
+.neo-hero-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.neo-btn-primary {
+  background-color: var(--color-lime);
   color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.85rem 1.75rem;
+  border: var(--border-thick);
+  box-shadow: var(--shadow-hard);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.neo-btn-primary:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-hard-lg);
+}
+
+.neo-btn-primary:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-hard-sm);
+}
+
+.neo-btn-secondary {
+  background-color: var(--color-white);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.85rem 1.5rem;
+  border: var(--border-thick);
+  box-shadow: var(--shadow-hard);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.neo-btn-secondary:hover {
+  background-color: var(--color-offwhite);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-hard-lg);
+}
+
+.neo-trust-statement {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.neo-trust-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #22c55e;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Hero Right: Pink Neo-Brutalist Graphic Preview */
+.neo-hero-right {
+  background-color: var(--color-pink);
+  padding: 2.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.neo-preview-stack {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Offset Lime Backing Panel */
+.neo-preview-backdrop {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-lime);
+  border: var(--border-thick);
+  box-shadow: var(--shadow-hard);
+  z-index: 1;
+}
+
+/* Main Card on Top */
+.neo-preview-card {
+  position: relative;
+  background-color: var(--color-white);
+  border: var(--border-thick);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-hard);
+  z-index: 2;
+}
+
+.neo-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: var(--border-thin);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.neo-preview-tag {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  background-color: var(--color-lime);
+  border: var(--border-thin);
+  padding: 0.15rem 0.5rem;
+}
+
+.neo-terminal-status {
+  background-color: var(--color-purple);
+  color: var(--color-white);
+  border: var(--border-thin);
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.neo-terminal-title {
+  color: var(--color-lime);
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.neo-profile-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.neo-meta-box {
+  border: var(--border-thin);
+  background-color: var(--color-offwhite);
+  padding: 0.5rem;
+}
+
+.neo-meta-box-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.neo-meta-box-val {
+  font-weight: 800;
+  color: var(--text-main);
+  margin-top: 0.15rem;
+}
+
+/* 3. Signal Category Strip */
+.neo-category-strip {
+  border-bottom: var(--border-thick);
+  background-color: var(--color-white);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.neo-category-item {
+  padding: 1.25rem 1rem;
+  border-right: var(--border-thick);
+  background-color: var(--color-white);
+  transition: background-color 0.1s ease;
+}
+
+.neo-category-item:last-child {
+  border-right: none;
+}
+
+.neo-category-item:hover {
+  background-color: var(--color-lime);
+}
+
+.neo-category-icon {
+  font-size: 1.5rem;
   margin-bottom: 0.5rem;
 }
 
-.input-container {
+.neo-category-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.neo-category-desc {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+/* 4. Investigation & Metrics Section */
+.neo-investigation-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  border-bottom: var(--border-thick);
+}
+
+.neo-main-investigation {
+  padding: 2.5rem;
+  border-right: var(--border-thick);
+  background-color: var(--color-white);
+}
+
+.neo-section-heading-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.neo-section-title {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+.neo-live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: var(--color-offwhite);
+  border: var(--border-thin);
+  padding: 0.25rem 0.6rem;
+}
+
+/* Account Analyzer Card (Neo-Brutal) */
+.neo-card {
+  border: var(--border-thick);
+  background-color: var(--color-white);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-hard);
+  margin-bottom: 1.75rem;
+}
+
+.neo-form-group {
+  margin-bottom: 1.25rem;
+}
+
+.neo-form-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.neo-input-container {
   display: flex;
   gap: 0.75rem;
 }
 
-.text-input {
+.neo-text-input {
   flex: 1;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  border: var(--border-thick);
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  background-color: var(--color-white);
+  transition: box-shadow 0.1s ease;
 }
 
-.text-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+.neo-text-input:focus {
+  box-shadow: var(--shadow-hard);
 }
 
-.submit-btn {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #ffffff;
-  background-color: var(--primary);
-  border: none;
-  border-radius: 8px;
+.neo-submit-btn {
+  padding: 0.85rem 1.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-main);
+  background-color: var(--color-lime);
+  border: var(--border-thick);
+  box-shadow: var(--shadow-hard);
   cursor: pointer;
-  transition: background-color 0.15s ease;
   white-space: nowrap;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
-.submit-btn:hover:not(:disabled) {
-  background-color: var(--primary-hover);
+.neo-submit-btn:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-hard-lg);
 }
 
-.submit-btn:disabled {
-  opacity: 0.6;
+.neo-submit-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
-.form-hint {
-  font-size: 0.8rem;
+.neo-form-hint {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
   color: var(--text-muted);
-  margin-top: 0.5rem;
+  margin-top: 0.6rem;
 }
 
-.alert {
-  border-radius: 8px;
-  padding: 1rem;
-  margin-top: 1.25rem;
+/* Alerts */
+.neo-alert {
+  border: var(--border-thick);
+  padding: 1.25rem;
+  margin-top: 1.5rem;
+  box-shadow: var(--shadow-hard-sm);
+  font-family: var(--font-mono);
+}
+
+.neo-alert-error {
+  background-color: #fee2e2;
+  border-color: var(--border-color);
+}
+
+.neo-alert-success {
+  background-color: #dcfce7;
+  border-color: var(--border-color);
+}
+
+.neo-alert-title {
+  font-family: var(--font-mono);
+  font-weight: 900;
   font-size: 0.9rem;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
 }
 
-.alert-error {
-  background-color: var(--error-bg);
-  border: 1px solid var(--error-border);
-  color: var(--error-text);
-}
-
-.alert-success {
-  background-color: var(--success-bg);
-  border: 1px solid var(--success-border);
-  color: var(--success-text);
-}
-
-.alert-title {
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-}
-
-.target-details {
-  margin-top: 0.75rem;
+.neo-target-details {
+  margin-top: 1rem;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--success-border);
+  border-top: var(--border-thin);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0.5rem;
-  font-size: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  font-size: 0.82rem;
 }
 
-.target-details div span {
-  font-weight: 600;
+.neo-target-details div span {
+  font-weight: 800;
+  text-transform: uppercase;
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
 }
 
-.notice-box {
-  background-color: var(--warning-bg);
-  border: 1px solid var(--warning-border);
-  color: var(--warning-text);
-  border-radius: 8px;
-  padding: 1rem;
-  font-size: 0.85rem;
+/* Findings / Evidence Grid */
+.neo-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
   margin-top: 1.5rem;
 }
 
-.notice-box h4 {
+.neo-evidence-card {
+  border: var(--border-thick);
+  padding: 1.25rem;
+  background-color: var(--bg-main);
+  box-shadow: var(--shadow-hard-sm);
+}
+
+.neo-evidence-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.neo-evidence-badge {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  border: var(--border-thin);
+}
+
+.neo-badge-lime { background-color: var(--color-lime); }
+.neo-badge-pink { background-color: var(--color-pink); }
+.neo-badge-purple { background-color: var(--color-purple); color: var(--color-white); }
+.neo-badge-amber { background-color: var(--color-amber); }
+
+.neo-evidence-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.neo-evidence-text {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* 4.2 Right-Hand Metrics Panel (Lime Green) */
+.neo-metrics-sidebar {
+  background-color: var(--color-lime);
+  padding: 2.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.neo-sidebar-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  border-bottom: var(--border-thick);
+  padding-bottom: 0.75rem;
+}
+
+.neo-metric-card {
+  background-color: var(--color-white);
+  border: var(--border-thick);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-hard);
+}
+
+.neo-metric-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.neo-metric-val {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  line-height: 1;
+  color: var(--text-main);
+}
+
+.neo-metric-desc {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+}
+
+/* 5. How It Works: Three-Part Section */
+.neo-process-section {
+  display: grid;
+  grid-template-columns: 240px 1.3fr 1fr;
+  border-bottom: var(--border-thick);
+}
+
+/* Left colored label panel */
+.neo-process-label-panel {
+  background-color: var(--color-pink);
+  border-right: var(--border-thick);
+  padding: 2.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.neo-process-label-title {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  text-transform: uppercase;
+  line-height: 1.05;
+}
+
+.neo-process-tag {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  background-color: var(--color-white);
+  border: var(--border-thin);
+  padding: 0.25rem 0.5rem;
+  box-shadow: var(--shadow-hard-sm);
+  align-self: flex-start;
+}
+
+/* Central numbered timeline */
+.neo-process-timeline {
+  padding: 2.5rem 2rem;
+  border-right: var(--border-thick);
+  background-color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.neo-step-item {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.neo-step-number {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  background-color: var(--color-lime);
+  border: var(--border-thick);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-hard-sm);
+  flex-shrink: 0;
+}
+
+.neo-step-content h4 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.neo-step-content p {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Right Purple CTA Panel */
+.neo-process-cta-panel {
+  background-color: var(--color-purple);
+  color: var(--color-white);
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.neo-cta-title {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  text-transform: uppercase;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+.neo-cta-text {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #e9d5ff;
+  margin-bottom: 1.5rem;
+}
+
+.neo-cta-btn {
+  background-color: var(--color-lime);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.85rem 1.5rem;
+  border: var(--border-thick);
+  box-shadow: var(--shadow-hard);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.neo-cta-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-hard-lg);
+}
+
+/* 6. Footer */
+.neo-footer {
+  padding: 1.5rem 2rem;
+  background-color: var(--color-white);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.neo-footer-brand {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  text-transform: uppercase;
+}
+
+.neo-footer-statement {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.neo-footer-links {
+  display: flex;
+  gap: 1.25rem;
+  list-style: none;
+}
+
+.neo-footer-links a {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
   font-weight: 700;
-  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  color: var(--text-main);
+  text-decoration: none;
+}
+
+.neo-footer-links a:hover {
+  text-decoration: underline;
+}
+
+/* Animation utilities */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-entrance {
+  animation: fadeInSlide 0.35s ease-out forwards;
+}
+
+/* Motion Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Responsive Adaptations */
+@media (max-width: 1100px) {
+  .neo-category-strip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .neo-category-item:nth-child(3) {
+    border-right: none;
+  }
+  .neo-investigation-layout {
+    grid-template-columns: 1fr;
+  }
+  .neo-main-investigation {
+    border-right: none;
+    border-bottom: var(--border-thick);
+  }
+  .neo-process-section {
+    grid-template-columns: 1fr;
+  }
+  .neo-process-label-panel,
+  .neo-process-timeline {
+    border-right: none;
+    border-bottom: var(--border-thick);
+  }
+}
+
+@media (max-width: 860px) {
+  .neo-hero-split {
+    grid-template-columns: 1fr;
+  }
+  .neo-hero-left {
+    border-right: none;
+    border-bottom: var(--border-thick);
+    padding: 2rem 1.5rem;
+  }
+  .neo-hero-headline {
+    font-size: 2.75rem;
+  }
+  .neo-navbar {
+    flex-wrap: wrap;
+  }
+  .neo-nav-links {
+    display: none; /* Collapsed for clean mobile view */
+  }
+}
+
+@media (max-width: 600px) {
+  .neo-category-strip {
+    grid-template-columns: 1fr;
+  }
+  .neo-category-item {
+    border-right: none;
+    border-bottom: var(--border-thick);
+  }
+  .neo-category-item:last-child {
+    border-bottom: none;
+  }
+  .neo-input-container {
+    flex-direction: column;
+  }
+  .neo-submit-btn {
+    width: 100%;
+  }
+  .neo-hero-headline {
+    font-size: 2.2rem;
+  }
 }

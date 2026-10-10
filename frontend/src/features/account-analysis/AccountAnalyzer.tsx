@@ -42,17 +42,17 @@ export const AccountAnalyzer: React.FC = () => {
   };
 
   return (
-    <div className="card">
+    <div className="neo-card" id="analyze-section">
       <form onSubmit={handleSubmit} noValidate>
-        <div className="form-group">
-          <label htmlFor="account-target-input" className="form-label">
+        <div className="neo-form-group">
+          <label htmlFor="account-target-input" className="neo-form-label">
             Target Account (Username or Profile URL)
           </label>
-          <div className="input-container">
+          <div className="neo-input-container">
             <input
               id="account-target-input"
               type="text"
-              className="text-input"
+              className="neo-text-input"
               placeholder="e.g. johndoe or https://www.instagram.com/johndoe/"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -63,13 +63,13 @@ export const AccountAnalyzer: React.FC = () => {
             />
             <button
               type="submit"
-              className="submit-btn"
+              className="neo-submit-btn"
               disabled={isLoading || !inputValue.trim()}
             >
               {isLoading ? 'Validating...' : 'Analyze'}
             </button>
           </div>
-          <p id="target-input-hint" className="form-hint">
+          <p id="target-input-hint" className="neo-form-hint">
             Accepts raw usernames (with or without @) or direct Instagram URLs.
           </p>
         </div>
@@ -77,18 +77,18 @@ export const AccountAnalyzer: React.FC = () => {
 
       {/* Error Presentation */}
       {error && (
-        <div className="alert alert-error" role="alert">
-          <div className="alert-title">Target Validation Failed</div>
+        <div className="neo-alert neo-alert-error" role="alert">
+          <div className="neo-alert-title">Target Validation Failed</div>
           <p>{error}</p>
         </div>
       )}
 
       {/* Honest Validated Target Presentation (No Fake ML predictions) */}
       {validatedTarget && (
-        <div className="alert alert-success" role="status">
-          <div className="alert-title">Target Validated Successfully</div>
+        <div className="neo-alert neo-alert-success animate-entrance" role="status">
+          <div className="neo-alert-title">Target Validated Successfully</div>
           <p>{serverMessage}</p>
-          <div className="target-details">
+          <div className="neo-target-details">
             <div>
               <span>Normalized Username:</span> @{validatedTarget.normalized_username}
             </div>
