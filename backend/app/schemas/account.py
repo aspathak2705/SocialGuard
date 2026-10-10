@@ -36,6 +36,10 @@ def sanitize_and_validate_target(raw_input: str) -> tuple[str, str, TargetInputT
     if not cleaned:
         raise ValueError("Target input cannot be empty.")
 
+    # Reject newlines, carriage returns, or control characters anywhere in the input
+    if any(ord(c) < 32 or ord(c) == 127 for c in cleaned):
+        raise ValueError("Target input contains invalid control characters or line breaks.")
+
     # Check if URL form (starts with http:// or https:// or contains instagram.com)
     is_url_pattern = cleaned.startswith("http://") or cleaned.startswith("https://") or "instagram.com" in cleaned.lower()
 
