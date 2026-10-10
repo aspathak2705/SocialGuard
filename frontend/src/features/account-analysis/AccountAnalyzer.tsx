@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { validateAccountTarget, collectAccountData, ApiServiceError } from '../../services/api';
-import type { AccountTarget, CollectionResult } from '../../types/account';
+import { validateAccountTarget, processPipelineData, ApiServiceError } from '../../services/api';
+import type { AccountTarget, UnifiedCollectionRun } from '../../types/account';
 
 export const AccountAnalyzer: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
@@ -9,10 +9,10 @@ export const AccountAnalyzer: React.FC = () => {
   const [validatedTarget, setValidatedTarget] = useState<AccountTarget | null>(null);
   const [serverMessage, setServerMessage] = useState<string | null>(null);
 
-  // Phase 2 Acquisition States
-  const [isCollecting, setIsCollecting] = useState(false);
-  const [collectionResult, setCollectionResult] = useState<CollectionResult | null>(null);
-  const [collectionError, setCollectionError] = useState<string | null>(null);
+  // Phase 3 Unified Pipeline States
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [pipelineRun, setPipelineRun] = useState<UnifiedCollectionRun | null>(null);
+  const [pipelineError, setPipelineError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +22,7 @@ export const AccountAnalyzer: React.FC = () => {
       setError('Please enter an Instagram username or profile URL.');
       setValidatedTarget(null);
       setServerMessage(null);
-      setCollectionResult(null);
+      setPipelineRun(null);
       return;
     }
 
@@ -30,8 +30,8 @@ export const AccountAnalyzer: React.FC = () => {
     setError(null);
     setValidatedTarget(null);
     setServerMessage(null);
-    setCollectionResult(null);
-    setCollectionError(null);
+    setPipelineRun(null);
+    setPipelineError(null);
 
     try {
       const response = await validateAccountTarget(trimmed);
@@ -48,24 +48,24 @@ export const AccountAnalyzer: React.FC = () => {
     }
   };
 
-  const handleStartAcquisition = async () => {
+  const handleStartPipeline = async () => {
     if (!validatedTarget) return;
 
-    setIsCollecting(true);
-    setCollectionError(null);
-    setCollectionResult(null);
+    setIsProcessing(true);
+    setPipelineError(null);
+    setPipelineRun(null);
 
     try {
-      const res = await collectAccountData(validatedTarget.original_input);
-      setCollectionResult(res.data);
+      const res = await processPipelineData(validatedTarget.original_input);
+      setPipelineRun(res.data);
     } catch (err: unknown) {
       if (err instanceof ApiServiceError) {
-        setCollectionError(err.message);
+        setPipelineError(err.message);
       } else {
-        setCollectionError('Unexpected error occurred during data acquisition.');
+        setPipelineError('Unexpected error occurred during pipeline execution.');
       }
     } finally {
-      setIsCollecting(false);
+      setIsProcessing(false);
     }
   };
 
@@ -99,7 +99,7 @@ export const AccountAnalyzer: React.FC = () => {
               placeholder="e.g. johndoe or https://www.instagram.com/johndoe/"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              disabled={isLoading || isCollecting}
+              disabled={isLoading || isProcessing}
               aria-describedby="target-input-hint"
               autoComplete="off"
               spellCheck="false"
@@ -107,7 +107,7 @@ export const AccountAnalyzer: React.FC = () => {
             <button
               type="submit"
               className="neo-submit-btn"
-              disabled={isLoading || isCollecting || !inputValue.trim()}
+              disabled={isLoading || isProcessing || !inputValue.trim()}
             >
               {isLoading ? 'Validating...' : 'Analyze'}
             </button>
@@ -151,47 +151,69 @@ export const AccountAnalyzer: React.FC = () => {
             </div>
           </div>
 
-          {/* Phase 2: Action to trigger multi-adapter acquisition */}
+          {/* Phase 3 Pipeline Trigger */}
           <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: 'var(--border-thin)' }}>
             <button
-              onClick={handleStartAcquisition}
+              onClick={handleStartPipeline}
               className="neo-btn-primary"
-              disabled={isCollecting}
+              disabled={isProcessing}
               style={{ padding: '0.65rem 1.25rem', fontSize: '0.85rem' }}
             >
-              {isCollecting ? 'Acquiring Multi-Source Data...' : 'Run Phase 2 Data Acquisition →'}
+              {isProcessing ? 'Processing Unified Pipeline...' : 'Run Phase 3 Unified Pipeline →'}
             </button>
           </div>
         </div>
       )}
 
-      {/* Collection Error */}
-      {collectionError && (
+      {/* Pipeline Error */}
+      {pipelineError && (
         <div className="neo-alert neo-alert-error animate-entrance" role="alert">
-          <div className="neo-alert-title">Data Acquisition Notice</div>
-          <p>{collectionError}</p>
+          <div className="neo-alert-title">Pipeline Notice</div>
+          <p>{pipelineError}</p>
         </div>
       )}
 
-      {/* Phase 2 Acquisition Results */}
-      {collectionResult && (
+      {/* Phase 3 Unified Pipeline Results */}
+      {pipelineRun && (
         <div className="neo-alert neo-alert-success animate-entrance" style={{ marginTop: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <div className="neo-alert-title" style={{ margin: 0 }}>
-              Acquisition Job: {collectionResult.request_id}
+              Pipeline Run: {pipelineRun.run_id} (v{pipelineRun.pipeline_version})
             </div>
-            <span className={`neo-evidence-badge ${getStatusBadgeClass(collectionResult.overall_status)}`}>
-              STATUS: {collectionResult.overall_status.toUpperCase()}
+            <span className={`neo-evidence-badge ${getStatusBadgeClass(pipelineRun.overall_status)}`}>
+              STATUS: {pipelineRun.overall_status.toUpperCase()}
             </span>
           </div>
 
-          <p style={{ fontSize: '0.82rem', marginBottom: '1rem' }}>
-            Data collected from configured adapters. Partial outcomes preserved without fabricating missing observations.
-          </p>
+          {/* Data Quality Overview */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem', margin: '0.75rem 0' }}>
+            <div style={{ border: 'var(--border-thin)', padding: '0.5rem', backgroundColor: 'var(--color-white)' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>RAW RECEIVED</div>
+              <strong>{pipelineRun.quality_summary.raw_records_received}</strong>
+            </div>
+            <div style={{ border: 'var(--border-thin)', padding: '0.5rem', backgroundColor: 'var(--color-white)' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>NORMALIZED</div>
+              <strong>{pipelineRun.quality_summary.valid_normalized_records}</strong>
+            </div>
+            <div style={{ border: 'var(--border-thin)', padding: '0.5rem', backgroundColor: 'var(--color-white)' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>DUPLICATES</div>
+              <strong>{pipelineRun.quality_summary.duplicate_records_detected}</strong>
+            </div>
+            <div style={{ border: 'var(--border-thin)', padding: '0.5rem', backgroundColor: 'var(--color-white)' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>RETAINED</div>
+              <strong>{pipelineRun.quality_summary.retained_records}</strong>
+            </div>
+            {pipelineRun.quality_summary.completeness_score !== undefined && (
+              <div style={{ border: 'var(--border-thin)', padding: '0.5rem', backgroundColor: 'var(--color-white)' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>COMPLETENESS</div>
+                <strong>{Math.round((pipelineRun.quality_summary.completeness_score || 0) * 100)}%</strong>
+              </div>
+            )}
+          </div>
 
-          {/* Per-collector outcomes */}
+          {/* Source Execution Outcomes */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', marginTop: '0.75rem' }}>
-            {Object.entries(collectionResult.sources).map(([src, status]) => (
+            {Object.entries(pipelineRun.source_executions).map(([src, status]) => (
               <div key={src} style={{ border: 'var(--border-thin)', padding: '0.75rem', backgroundColor: 'var(--color-white)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
                   <strong style={{ fontSize: '0.85rem', textTransform: 'uppercase' }}>{src}</strong>
@@ -202,23 +224,28 @@ export const AccountAnalyzer: React.FC = () => {
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                   <div>Duration: {status.duration_ms ? `${status.duration_ms}ms` : 'N/A'}</div>
                   {status.error_code && <div style={{ color: '#dc2626' }}>Code: {status.error_code}</div>}
-                  <div>Collected: {status.collected_field_names.length} fields</div>
+                  <div>Collected Fields: {status.collected_field_names.length}</div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Observations Summary */}
-          {collectionResult.observations.length > 0 && (
+          {/* Canonical Observations Explorer */}
+          {pipelineRun.canonical_observations.length > 0 && (
             <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: 'var(--border-thin)' }}>
-              <strong style={{ fontSize: '0.8rem', textTransform: 'uppercase' }}>Observations Acquired:</strong>
-              <div style={{ fontSize: '0.8rem', marginTop: '0.35rem' }}>
-                {collectionResult.observations.map((obs, idx) => (
-                  <div key={idx} style={{ marginBottom: '0.35rem' }}>
-                    • Source <strong>{obs.source_provenance}</strong>: Completeness score{' '}
-                    <strong>{obs.completeness_score !== undefined ? `${Math.round((obs.completeness_score || 0) * 100)}%` : 'N/A'}</strong>
-                    {obs.posts_count !== undefined && ` | Posts: ${obs.posts_count}`}
-                    {obs.followers_count !== undefined && ` | Followers: ${obs.followers_count}`}
+              <strong style={{ fontSize: '0.8rem', textTransform: 'uppercase' }}>Canonical Observations (Traceable):</strong>
+              <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {pipelineRun.canonical_observations.map((obs) => (
+                  <div key={obs.observation_id} style={{ border: 'var(--border-thin)', padding: '0.5rem', backgroundColor: 'var(--color-white)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span><strong>{obs.observation_type.toUpperCase()}</strong> ({obs.observation_id})</span>
+                      <span className="neo-evidence-badge neo-badge-purple">{obs.source}</span>
+                    </div>
+                    <div style={{ marginTop: '0.25rem', color: 'var(--text-muted)' }}>
+                      Provenance: {obs.source} • Timestamp: {new Date(obs.observation_timestamp).toLocaleTimeString()}
+                      {obs.posts_count !== undefined && ` • Posts: ${obs.posts_count}`}
+                      {obs.followers_count !== undefined && ` • Followers: ${obs.followers_count}`}
+                    </div>
                   </div>
                 ))}
               </div>

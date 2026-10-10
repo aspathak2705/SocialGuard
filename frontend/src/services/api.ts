@@ -1,6 +1,7 @@
 import type {
   AccountValidateResponse,
   AccountAcquisitionResponse,
+  PipelineProcessResponse,
   ApiErrorResponse,
 } from '../types/account';
 
@@ -106,6 +107,52 @@ export async function collectAccountData(input: string): Promise<AccountAcquisit
     }
     throw new ApiServiceError(
       'Unable to communicate with SocialGuard acquisition service.',
+      'NETWORK_ERROR'
+    );
+  }
+}
+
+export async function processPipelineData(input: string): Promise<PipelineProcessResponse> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/pipeline/process`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ input }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      if (data && 'error' in data) {
+        const errResp = data as ApiErrorResponse;
+        throw new ApiServiceError(
+          errResp.error.message || 'Pipeline processing failed.',
+          errResp.error.code || `HTTP_${response.status}`,
+          errResp.error.details
+        );
+      }
+      throw new ApiServiceError(
+        `Server returned error ${response.status}: ${response.statusText}`,
+        `HTTP_${response.status}`
+      );
+    }
+
+    return data as PipelineProcessResponse;
+  } catch (err: unknown) {
+    clearTimeout(timeoutId);
+    if (err instanceof ApiServiceError) throw err;
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new ApiServiceError('Pipeline processing request timed out.', 'TIMEOUT_ERROR');
+    }
+    throw new ApiServiceError(
+      'Unable to communicate with SocialGuard pipeline service.',
       'NETWORK_ERROR'
     );
   }

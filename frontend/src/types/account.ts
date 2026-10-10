@@ -75,6 +75,66 @@ export interface CollectionResult {
   completed_at?: string;
 }
 
+// Phase 3 Pipeline Types
+export type ObservationType = 'profile' | 'media' | 'post' | 'browser_dom';
+export type FieldAvailabilityStatus = 'observed' | 'not_returned' | 'unavailable' | 'not_applicable' | 'invalid';
+
+export interface FieldValueMetadata {
+  field_name: string;
+  status: FieldAvailabilityStatus;
+  raw_value?: unknown;
+  detail?: string;
+}
+
+export interface CanonicalObservation {
+  observation_id: string;
+  observation_type: ObservationType;
+  target_username: string;
+  source: CollectorSource;
+  source_record_id?: string;
+  observation_timestamp: string;
+  normalization_timestamp: string;
+  account_id?: string;
+  full_name?: string;
+  biography?: string;
+  is_private?: boolean;
+  is_verified?: boolean;
+  posts_count?: number;
+  followers_count?: number;
+  following_count?: number;
+  has_profile_pic?: boolean;
+  external_url?: string;
+  field_metadata: Record<string, FieldValueMetadata>;
+  validation_warnings: string[];
+  is_duplicate: boolean;
+  duplicate_of?: string;
+}
+
+export interface DataQualitySummary {
+  raw_records_received: number;
+  valid_normalized_records: number;
+  invalid_records_rejected: number;
+  duplicate_records_detected: number;
+  retained_records: number;
+  completeness_score?: number;
+  source_breakdown: Partial<Record<CollectorSource, Record<string, number>>>;
+  warnings: string[];
+}
+
+export interface UnifiedCollectionRun {
+  run_id: string;
+  target: AccountTarget;
+  overall_status: OverallCollectionStatus;
+  pipeline_version: string;
+  created_at: string;
+  completed_at?: string;
+  source_executions: Partial<Record<CollectorSource, DataSourceStatus>>;
+  canonical_observations: CanonicalObservation[];
+  quality_summary: DataQualitySummary;
+  missing_data_summary: string[];
+  errors: string[];
+}
+
 export interface ApiSuccessResponse<T> {
   success: true;
   timestamp: string;
@@ -95,3 +155,4 @@ export interface ApiErrorResponse {
 
 export type AccountValidateResponse = ApiSuccessResponse<AccountValidateResponseData>;
 export type AccountAcquisitionResponse = ApiSuccessResponse<CollectionResult>;
+export type PipelineProcessResponse = ApiSuccessResponse<UnifiedCollectionRun>;

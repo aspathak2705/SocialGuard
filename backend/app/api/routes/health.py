@@ -41,13 +41,14 @@ async def get_readiness() -> ReadinessResponse:
     return ReadinessResponse(
         status="ready",
         ready=True,
-        phase="Phase 2: Modular Data Acquisition & Orchestration",
+        phase="Phase 3: Unified Data Pipeline & Validation",
         subsystems={
             "api_foundation": "ready",
             "account_validation": "ready",
             "collectors": "ready_phase_2",
             "orchestrator": "ready_phase_2",
-            "feature_pipeline": "planned_phase_3",
+            "pipeline": "ready_phase_3",
+            "feature_pipeline": "planned_phase_4",
             "ml_inference": "planned_phase_4",
             "database": "uninitialized_stateless",
         },
