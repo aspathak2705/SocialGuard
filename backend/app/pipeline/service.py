@@ -29,6 +29,11 @@ class UnifiedPipelineService:
         self.instaloader_norm = InstaloaderNormalizer()
         self.gallery_dl_norm = GalleryDlNormalizer()
         self.playwright_norm = PlaywrightNormalizer()
+        self._runs = {}
+
+    def get_run(self, run_id: str) -> Optional[UnifiedCollectionRun]:
+        return self._runs.get(run_id)
+
 
     def process_acquisition_result(
         self,
@@ -95,7 +100,7 @@ class UnifiedPipelineService:
             warnings=all_warnings,
         )
 
-        return UnifiedCollectionRun(
+        unified_run = UnifiedCollectionRun(
             run_id=run_id,
             target=collection_result.target,
             overall_status=collection_result.overall_status,
@@ -108,6 +113,9 @@ class UnifiedPipelineService:
             missing_data_summary=collection_result.missing_data_summary,
             errors=[collection_result.error_message] if collection_result.error_message else [],
         )
+        self._runs[run_id] = unified_run
+        return unified_run
+
 
 
 pipeline_service = UnifiedPipelineService()

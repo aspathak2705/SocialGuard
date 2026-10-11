@@ -84,17 +84,37 @@ async def analyze_account_prediction(request: PredictAccountRequest) -> PredictR
         input_type=input_type,
     )
 
-    # 2. Acquisition Orchestration
-    collection_result = await default_orchestrator.execute_collection(target=target)
+    # 2. Acquisition Orchestration or Run Lookup
+    if request.run_id:
+        existing_run = pipeline_service.get_run(request.run_id)
+        if not existing_run:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Collection run ID '{request.run_id}' not found.",
+            )
+        if existing_run.target.normalized_username != username:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Collection run ID '{request.run_id}' belongs to target '{existing_run.target.normalized_username}', not requested '{username}'.",
+            )
+        unified_run = existing_run
+    else:
+        collection_result = await default_orchestrator.execute_collection(target=target)
+        unified_run = pipeline_service.process_acquisition_result(collection_result)
 
-    # 3. Canonical Pipeline Normalization & Deduplication
-    unified_run = pipeline_service.process_acquisition_result(collection_result)
-
-    # 4. Feature Extraction & Provenance Tracking
+    # 3. Feature Extraction & Provenance Tracking
     feature_result = extract_features_from_observations(
         username=username,
         observations=unified_run.canonical_observations,
     )
+
+    # Enforce minimum feature coverage policy (minimum 25% to prevent ungrounded inferences)
+    if feature_result.coverage_ratio < 0.25:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Insufficient observation coverage ({feature_result.coverage_ratio * 100:.1f}%). Missing core signals: {', '.join(feature_result.missing_features)}.",
+        )
+
 
     # 5. ML Model Inference & Local Attribution
     elapsed_ms = round((time.perf_counter() - start_time) * 1000.0, 2)
