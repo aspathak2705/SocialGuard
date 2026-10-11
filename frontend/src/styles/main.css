@@ -43,18 +43,20 @@ body {
   color: var(--text-main);
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
-  padding: 12px;
+  padding: 12px 16px;
 }
 
 /* Page Frame */
 .neo-page-container {
-  max-width: 1360px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
   border: var(--border-thick);
   background-color: var(--color-white);
   box-shadow: var(--shadow-hard-lg);
   overflow: hidden;
 }
+
 
 /* 1. Header / Navbar */
 .neo-navbar {

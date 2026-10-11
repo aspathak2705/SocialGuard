@@ -18,7 +18,6 @@ export const App: React.FC = () => {
       <header className="neo-navbar">
         <div className="neo-brand">
           <h2 style={{ fontSize: '1.5rem', margin: 0, textTransform: 'uppercase' }}>SocialGuard</h2>
-          <span className="neo-brand-badge">Phase 1 Foundation</span>
         </div>
         <nav>
           <ul className="neo-nav-links">
@@ -29,10 +28,10 @@ export const App: React.FC = () => {
               <a href="#signals" className="neo-nav-link">Signals</a>
             </li>
             <li>
-              <a href="#how-it-works" className="neo-nav-link">How It Works</a>
+              <a href="#metrics" className="neo-nav-link">Investigation</a>
             </li>
             <li>
-              <a href="#metrics" className="neo-nav-link">Metrics</a>
+              <a href="#how-it-works" className="neo-nav-link">How It Works</a>
             </li>
           </ul>
         </nav>
@@ -48,16 +47,15 @@ export const App: React.FC = () => {
           <div>
             <span className="neo-eyebrow">Explainable AI • Multi-Signal Architecture</span>
             <h1 className="neo-hero-headline">
-              Look Closer. <br />
-              Stay Safer.
+              Investigate suspicious accounts with evidence.
             </h1>
             <p className="neo-hero-subtext">
-              Multi-signal Instagram account inspection engineered to detect synthetic,
-              inauthentic, and bot behaviors using explainable evidence models.
+              Analyze public Instagram account signals, inspect data quality, and understand
+              the factors behind each model assessment with auditable transparency.
             </p>
             <div className="neo-hero-actions">
               <button onClick={scrollToAnalyze} className="neo-btn-primary">
-                Start Investigation →
+                Analyze an account →
               </button>
               <button onClick={scrollToProcess} className="neo-btn-secondary">
                 How It Works
@@ -76,9 +74,9 @@ export const App: React.FC = () => {
             <div className="neo-preview-backdrop"></div>
             <div className="neo-preview-card">
               <div className="neo-preview-header">
-                <span className="neo-preview-tag">Target Preview</span>
+                <span className="neo-preview-tag">Investigation Overview</span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 800 }}>
-                  DEMO_SPEC_V1
+                  SYSTEM ACTIVE
                 </span>
               </div>
               <div className="neo-terminal-status">
@@ -94,16 +92,16 @@ export const App: React.FC = () => {
                   <div className="neo-meta-box-val">Multi-Signal XAI</div>
                 </div>
                 <div className="neo-meta-box">
-                  <div className="neo-meta-box-label">Adapter Pipeline</div>
-                  <div className="neo-meta-box-val">Phase 2 Planned</div>
+                  <div className="neo-meta-box-label">Data Ingestion</div>
+                  <div className="neo-meta-box-val">Triple-Adapter</div>
                 </div>
                 <div className="neo-meta-box">
                   <div className="neo-meta-box-label">Inference Model</div>
                   <div className="neo-meta-box-val">XGBoost + SHAP</div>
                 </div>
                 <div className="neo-meta-box">
-                  <div className="neo-meta-box-label">Persistence</div>
-                  <div className="neo-meta-box-val">Stateless (v1)</div>
+                  <div className="neo-meta-box-label">Evaluation State</div>
+                  <div className="neo-meta-box-val">Provisional (Audit Verified)</div>
                 </div>
               </div>
             </div>
@@ -115,33 +113,33 @@ export const App: React.FC = () => {
       <section className="neo-category-strip" id="signals">
         <div className="neo-category-item">
           <div className="neo-category-icon">👤</div>
-          <h3 className="neo-category-title">Profile</h3>
-          <p className="neo-category-desc">Username patterns, bio structure, verification flags</p>
+          <h3 className="neo-category-title">Profile Signals</h3>
+          <p className="neo-category-desc">Username patterns, bio length, external URLs, avatar presence</p>
         </div>
         <div className="neo-category-item">
           <div className="neo-category-icon">⚡</div>
-          <h3 className="neo-category-title">Behavior</h3>
-          <p className="neo-category-desc">Post cadences, active intervals, bursting behavior</p>
-        </div>
-        <div className="neo-category-item">
-          <div className="neo-category-icon">📸</div>
-          <h3 className="neo-category-title">Content</h3>
-          <p className="neo-category-desc">Media variance, caption entropy, repost fingerprints</p>
+          <h3 className="neo-category-title">Posting Behavior</h3>
+          <p className="neo-category-desc">Post volume, media absence, zero-content anomalies</p>
         </div>
         <div className="neo-category-item">
           <div className="neo-category-icon">💬</div>
-          <h3 className="neo-category-title">Engagement</h3>
-          <p className="neo-category-desc">Follower-to-following anomalies, comment ratios</p>
+          <h3 className="neo-category-title">Network Signals</h3>
+          <p className="neo-category-desc">Follower-to-following ratios, extreme connection disparity</p>
         </div>
         <div className="neo-category-item">
-          <div className="neo-category-icon">🕸️</div>
-          <h3 className="neo-category-title">Network</h3>
-          <p className="neo-category-desc">Cluster reciprocity, synthetic follow networks</p>
+          <div className="neo-category-icon">📊</div>
+          <h3 className="neo-category-title">Scale Metrics</h3>
+          <p className="neo-category-desc">Log-transformed counts, media density per follower</p>
+        </div>
+        <div className="neo-category-item">
+          <div className="neo-category-icon">🛡️</div>
+          <h3 className="neo-category-title">Data Quality</h3>
+          <p className="neo-category-desc">Canonical normalization, multi-source deduplication</p>
         </div>
         <div className="neo-category-item">
           <div className="neo-category-icon">🔍</div>
-          <h3 className="neo-category-title">Evidence</h3>
-          <p className="neo-category-desc">Explainable SHAP signals, auditable trail</p>
+          <h3 className="neo-category-title">Explainability</h3>
+          <p className="neo-category-desc">Local SHAP attribution for transparent, auditable decisions</p>
         </div>
       </section>
 
@@ -150,10 +148,10 @@ export const App: React.FC = () => {
         {/* Main Content Area */}
         <div className="neo-main-investigation">
           <div className="neo-section-heading-wrap">
-            <h2 className="neo-section-title">Active Investigation Panel</h2>
+            <h2 className="neo-section-title">Account Investigation</h2>
             <div className="neo-live-indicator">
               <span className="neo-trust-dot"></span>
-              Phase 1 Live Validation Ready
+              Account validation available
             </div>
           </div>
 
@@ -169,7 +167,7 @@ export const App: React.FC = () => {
               </div>
               <h4 className="neo-evidence-title">Triple-Adapter Ingestion</h4>
               <p className="neo-evidence-text">
-                Future acquisition combines Instaloader metadata, gallery-dl media graphs, and Playwright DOM checks.
+                Acquisition orchestrates Instaloader metadata, gallery-dl media graphs, and Playwright DOM checks.
               </p>
             </div>
 
@@ -180,7 +178,7 @@ export const App: React.FC = () => {
               </div>
               <h4 className="neo-evidence-title">Explainability First</h4>
               <p className="neo-evidence-text">
-                Predictions produce calibrated SHAP evidence attribution rather than uninterpretable opaque scores.
+                Predictions produce local SHAP evidence attribution rather than uninterpretable opaque scores.
               </p>
             </div>
 
@@ -197,32 +195,32 @@ export const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Right-Hand Metrics Sidebar (Lime Green) */}
+        {/* Right-Hand Operational Metrics Sidebar */}
         <aside className="neo-metrics-sidebar">
-          <h3 className="neo-sidebar-title">Foundation Metrics</h3>
+          <h3 className="neo-sidebar-title">System Metrics</h3>
 
           <div className="neo-metric-card">
-            <div className="neo-metric-label">Target Format</div>
+            <div className="neo-metric-label">Target Normalization</div>
             <div className="neo-metric-val">100%</div>
             <div className="neo-metric-desc">URL & handle normalization consistency</div>
           </div>
 
           <div className="neo-metric-card">
-            <div className="neo-metric-label">Planned Adapters</div>
+            <div className="neo-metric-label">Active Collectors</div>
             <div className="neo-metric-val">3</div>
             <div className="neo-metric-desc">Instaloader, gallery-dl, Playwright</div>
           </div>
 
           <div className="neo-metric-card">
-            <div className="neo-metric-label">Signal Vectors</div>
-            <div className="neo-metric-val">6</div>
-            <div className="neo-metric-desc">Multivariate feature channels</div>
+            <div className="neo-metric-label">Engineered Features</div>
+            <div className="neo-metric-val">21</div>
+            <div className="neo-metric-desc">Audited multi-signal feature vector</div>
           </div>
 
           <div className="neo-metric-card">
-            <div className="neo-metric-label">Persistence Model</div>
-            <div className="neo-metric-val">v1</div>
-            <div className="neo-metric-desc">Stateless contract verification</div>
+            <div className="neo-metric-label">Model Verification</div>
+            <div className="neo-metric-val">Provisional</div>
+            <div className="neo-metric-desc">Holdout metrics reproduced; research bound</div>
           </div>
         </aside>
       </section>
@@ -257,7 +255,7 @@ export const App: React.FC = () => {
           <div className="neo-step-item">
             <div className="neo-step-number">02</div>
             <div className="neo-step-content">
-              <h4>Multi-Signal Acquisition (Phase 2)</h4>
+              <h4>Multi-Signal Acquisition</h4>
               <p>
                 Permitted public metrics and metadata are acquired through three specialized collectors without storing credentials.
               </p>
@@ -267,7 +265,7 @@ export const App: React.FC = () => {
           <div className="neo-step-item">
             <div className="neo-step-number">03</div>
             <div className="neo-step-content">
-              <h4>Explainable AI Assessment (Phase 4)</h4>
+              <h4>Explainable AI Assessment</h4>
               <p>
                 Trained classification models analyze feature signals and return transparent SHAP explanations with auditable limitations.
               </p>
@@ -278,31 +276,32 @@ export const App: React.FC = () => {
         {/* Right Purple CTA Panel */}
         <div className="neo-process-cta-panel">
           <div>
-            <h3 className="neo-cta-title">Ready To Validate Target?</h3>
+            <h3 className="neo-cta-title">Ready To Investigate?</h3>
             <p className="neo-cta-text">
-              Try the Phase 1 target validation engine right now. Test URL variations, whitespace handling, and domain security checks.
+              Begin by analyzing a public profile handle or URL. View normalized observations, provenance, and model assessments.
             </p>
           </div>
           <button onClick={scrollToAnalyze} className="neo-cta-btn">
-            Validate An Account Now →
+            Investigate An Account Now →
           </button>
         </div>
       </section>
 
       {/* Notice Box */}
       <div style={{ padding: '1.25rem 2rem', backgroundColor: 'var(--color-offwhite)', borderBottom: 'var(--border-thick)', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
-        <strong>System Status Notice:</strong> Live account data acquisition and machine-learning inference are scheduled for subsequent project phases. No real account scraping or artificial predictions are performed in this phase.
+        <strong>Investigation Notice:</strong> Machine learning assessments are model-based hypotheses with local SHAP attributions, not definitive determinations of account authenticity.
       </div>
 
       {/* 6. Footer */}
       <footer className="neo-footer">
         <div className="neo-footer-brand">SocialGuard</div>
         <div className="neo-footer-statement">
-          Explainable Multi-Signal Instagram Fake Account Detection • Final-Year B.Tech Capstone Project
+          Explainable Multi-Signal Instagram Account Investigation System
         </div>
         <ul className="neo-footer-links">
           <li><a href="#overview">Overview</a></li>
           <li><a href="#signals">Signals</a></li>
+          <li><a href="#metrics">Investigation</a></li>
           <li><a href="#how-it-works">How It Works</a></li>
         </ul>
       </footer>
@@ -311,3 +310,4 @@ export const App: React.FC = () => {
 };
 
 export default App;
+
