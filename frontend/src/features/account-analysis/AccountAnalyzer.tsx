@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
-import { validateAccountTarget, processPipelineData, ApiServiceError } from '../../services/api';
-import type { AccountTarget, UnifiedCollectionRun } from '../../types/account';
+import {
+  validateAccountTarget,
+  processPipelineData,
+  predictAccountInference,
+  ApiServiceError,
+} from '../../services/api';
+import type {
+  AccountTarget,
+  UnifiedCollectionRun,
+  PredictionAssessment,
+} from '../../types/account';
 
 export const AccountAnalyzer: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
@@ -14,6 +23,11 @@ export const AccountAnalyzer: React.FC = () => {
   const [pipelineRun, setPipelineRun] = useState<UnifiedCollectionRun | null>(null);
   const [pipelineError, setPipelineError] = useState<string | null>(null);
 
+  // Phase 5 ML Inference States
+  const [isPredicting, setIsPredicting] = useState(false);
+  const [prediction, setPrediction] = useState<PredictionAssessment | null>(null);
+  const [predictionError, setPredictionError] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = inputValue.trim();
@@ -23,6 +37,7 @@ export const AccountAnalyzer: React.FC = () => {
       setValidatedTarget(null);
       setServerMessage(null);
       setPipelineRun(null);
+      setPrediction(null);
       return;
     }
 
@@ -32,6 +47,8 @@ export const AccountAnalyzer: React.FC = () => {
     setServerMessage(null);
     setPipelineRun(null);
     setPipelineError(null);
+    setPrediction(null);
+    setPredictionError(null);
 
     try {
       const response = await validateAccountTarget(trimmed);
@@ -69,6 +86,27 @@ export const AccountAnalyzer: React.FC = () => {
     }
   };
 
+  const handleRunPrediction = async () => {
+    if (!validatedTarget) return;
+
+    setIsPredicting(true);
+    setPredictionError(null);
+    setPrediction(null);
+
+    try {
+      const res = await predictAccountInference(validatedTarget.normalized_username);
+      setPrediction(res.data);
+    } catch (err: unknown) {
+      if (err instanceof ApiServiceError) {
+        setPredictionError(err.message);
+      } else {
+        setPredictionError('Unexpected error during model inference execution.');
+      }
+    } finally {
+      setIsPredicting(false);
+    }
+  };
+
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case 'success':
@@ -99,7 +137,7 @@ export const AccountAnalyzer: React.FC = () => {
               placeholder="e.g. johndoe or https://www.instagram.com/johndoe/"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              disabled={isLoading || isProcessing}
+              disabled={isLoading || isProcessing || isPredicting}
               aria-describedby="target-input-hint"
               autoComplete="off"
               spellCheck="false"
@@ -107,7 +145,7 @@ export const AccountAnalyzer: React.FC = () => {
             <button
               type="submit"
               className="neo-submit-btn"
-              disabled={isLoading || isProcessing || !inputValue.trim()}
+              disabled={isLoading || isProcessing || isPredicting || !inputValue.trim()}
             >
               {isLoading ? 'Validating...' : 'Analyze'}
             </button>
@@ -151,19 +189,28 @@ export const AccountAnalyzer: React.FC = () => {
             </div>
           </div>
 
-          {/* Phase 3 Pipeline Trigger */}
-          <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: 'var(--border-thin)' }}>
+          {/* Action Trigger Buttons */}
+          <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: 'var(--border-thin)', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <button
               onClick={handleStartPipeline}
-              className="neo-btn-primary"
-              disabled={isProcessing}
+              className="neo-btn-secondary"
+              disabled={isProcessing || isPredicting}
               style={{ padding: '0.65rem 1.25rem', fontSize: '0.85rem' }}
             >
               {isProcessing ? 'Processing Unified Pipeline...' : 'Run Phase 3 Unified Pipeline →'}
             </button>
+            <button
+              onClick={handleRunPrediction}
+              className="neo-btn-primary"
+              disabled={isProcessing || isPredicting}
+              style={{ padding: '0.65rem 1.25rem', fontSize: '0.85rem' }}
+            >
+              {isPredicting ? 'Executing Inference & SHAP...' : 'Run Phase 5 AI Inference →'}
+            </button>
           </div>
         </div>
       )}
+
 
       {/* Pipeline Error */}
       {pipelineError && (
@@ -211,25 +258,6 @@ export const AccountAnalyzer: React.FC = () => {
             )}
           </div>
 
-          {/* Source Execution Outcomes */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', marginTop: '0.75rem' }}>
-            {Object.entries(pipelineRun.source_executions).map(([src, status]) => (
-              <div key={src} style={{ border: 'var(--border-thin)', padding: '0.75rem', backgroundColor: 'var(--color-white)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                  <strong style={{ fontSize: '0.85rem', textTransform: 'uppercase' }}>{src}</strong>
-                  <span className={`neo-evidence-badge ${getStatusBadgeClass(status.status)}`}>
-                    {status.status}
-                  </span>
-                </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  <div>Duration: {status.duration_ms ? `${status.duration_ms}ms` : 'N/A'}</div>
-                  {status.error_code && <div style={{ color: '#dc2626' }}>Code: {status.error_code}</div>}
-                  <div>Collected Fields: {status.collected_field_names.length}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-
           {/* Canonical Observations Explorer */}
           {pipelineRun.canonical_observations.length > 0 && (
             <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: 'var(--border-thin)' }}>
@@ -253,6 +281,174 @@ export const AccountAnalyzer: React.FC = () => {
           )}
         </div>
       )}
+
+
+      {/* Prediction Error */}
+      {predictionError && (
+        <div className="neo-alert neo-alert-error animate-entrance" role="alert" style={{ marginTop: '1.5rem' }}>
+          <div className="neo-alert-title">Inference Execution Error</div>
+          <p>{predictionError}</p>
+        </div>
+      )}
+
+      {/* Phase 5 Model Prediction & Investigation Dashboard */}
+      {prediction && (
+        <div className="neo-card animate-entrance" style={{ marginTop: '1.5rem', border: '3px solid #000' }}>
+          {/* Provisional Banner */}
+          <div
+            style={{
+              backgroundColor: '#fef08a',
+              borderBottom: '2px solid #000',
+              padding: '0.75rem',
+              fontWeight: 700,
+              fontSize: '0.8rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+          >
+            <span>⚠️</span>
+            <span>{prediction.verification_note}</span>
+          </div>
+
+          <div style={{ padding: '1.25rem' }}>
+            {/* Header / Assessment Summary */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', borderBottom: 'var(--border-thin)', paddingBottom: '1rem' }}>
+              <div>
+                <span className="neo-eyebrow">ASSESSMENT REPORT • {prediction.request_id}</span>
+                <h3 style={{ margin: '0.25rem 0', fontSize: '1.4rem' }}>
+                  Target: @{prediction.target_username}
+                </h3>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  Model: {prediction.model_id} • Status: <strong>{prediction.verification_status}</strong> • Time: {prediction.processing_time_ms}ms
+                </div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <span
+                  className="neo-evidence-badge"
+                  style={{
+                    backgroundColor: prediction.predicted_class === 'fake' ? '#fda4af' : '#bef264',
+                    fontSize: '1rem',
+                    padding: '0.4rem 0.8rem',
+                  }}
+                >
+                  PREDICTED: {prediction.predicted_class.toUpperCase()}
+                </span>
+                <div style={{ fontSize: '0.75rem', marginTop: '0.35rem', fontWeight: 600 }}>
+                  Probability: {(prediction.fake_probability * 100).toFixed(1)}% ({prediction.score_label})
+                </div>
+              </div>
+            </div>
+
+            {/* Quality & Coverage Stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem', margin: '1rem 0' }}>
+              <div style={{ border: 'var(--border-thin)', padding: '0.5rem', backgroundColor: '#f9fafb' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>FEATURE COVERAGE</div>
+                <strong>{Math.round(prediction.feature_coverage_ratio * 100)}%</strong>
+              </div>
+              <div style={{ border: 'var(--border-thin)', padding: '0.5rem', backgroundColor: '#f9fafb' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>DECISION THRESHOLD</div>
+                <strong>{prediction.decision_threshold}</strong>
+              </div>
+              <div style={{ border: 'var(--border-thin)', padding: '0.5rem', backgroundColor: '#f9fafb' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>MISSING FEATURES</div>
+                <strong>{prediction.missing_features.length}</strong>
+              </div>
+              <div style={{ border: 'var(--border-thin)', padding: '0.5rem', backgroundColor: '#f9fafb' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>EXPLANATION METHOD</div>
+                <strong style={{ fontSize: '0.75rem' }}>{prediction.explanation.method}</strong>
+              </div>
+            </div>
+
+            {/* Explainability Panel (Local SHAP) */}
+            <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: 'var(--border-thin)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <h4 style={{ margin: 0, textTransform: 'uppercase', fontSize: '0.9rem' }}>
+                  Local Feature Attributions (SHAP Explanations)
+                </h4>
+                <span className="neo-evidence-badge neo-badge-purple">
+                  {prediction.explanation.status.toUpperCase()}
+                </span>
+              </div>
+              {prediction.explanation.warning && (
+                <p style={{ fontSize: '0.75rem', color: '#b45309', margin: '0.25rem 0 0.75rem' }}>
+                  {prediction.explanation.warning}
+                </p>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {prediction.explanation.contributions.map((c) => (
+                  <div
+                    key={c.feature_name}
+                    style={{
+                      border: 'var(--border-thin)',
+                      padding: '0.5rem 0.75rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      backgroundColor: c.direction === 'fake' ? '#fff1f2' : '#f0fdf4',
+                    }}
+                  >
+                    <div>
+                      <strong style={{ fontSize: '0.85rem' }}>{c.feature_name}</strong>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
+                        (val: {c.feature_value})
+                      </span>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span
+                        style={{
+                          fontWeight: 700,
+                          fontSize: '0.85rem',
+                          color: c.direction === 'fake' ? '#be123c' : '#15803d',
+                        }}
+                      >
+                        {c.contribution > 0 ? `+${c.contribution}` : c.contribution}
+                      </span>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: '0.35rem' }}>
+                        → {c.direction}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Evidence & Provenance Explorer */}
+            {prediction.evidence.length > 0 && (
+              <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: 'var(--border-thin)' }}>
+                <h4 style={{ margin: '0 0 0.75rem 0', textTransform: 'uppercase', fontSize: '0.9rem' }}>
+                  Observed Evidence & Source Provenance
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.5rem' }}>
+                  {prediction.evidence.map((ev) => (
+                    <div
+                      key={ev.field_name}
+                      style={{
+                        border: 'var(--border-thin)',
+                        padding: '0.5rem',
+                        backgroundColor: '#ffffff',
+                        fontSize: '0.8rem',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <strong>{ev.field_name}</strong>
+                        <span className="neo-evidence-badge neo-badge-purple" style={{ fontSize: '0.65rem' }}>
+                          {ev.source}
+                        </span>
+                      </div>
+                      <div style={{ color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                        Observed: {String(ev.observed_value)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+

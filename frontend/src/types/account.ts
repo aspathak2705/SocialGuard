@@ -156,3 +156,52 @@ export interface ApiErrorResponse {
 export type AccountValidateResponse = ApiSuccessResponse<AccountValidateResponseData>;
 export type AccountAcquisitionResponse = ApiSuccessResponse<CollectionResult>;
 export type PipelineProcessResponse = ApiSuccessResponse<UnifiedCollectionRun>;
+
+// Phase 5 Prediction & Explainability Types
+export interface FeatureContribution {
+  feature_name: string;
+  feature_value: number;
+  contribution: number;
+  direction: 'fake' | 'genuine';
+  description?: string;
+}
+
+export interface ExplanationResult {
+  status: 'available' | 'fallback' | 'unavailable';
+  method: string;
+  contributions: FeatureContribution[];
+  top_drivers: string[];
+  warning?: string;
+}
+
+export interface EvidenceItem {
+  field_name: string;
+  observed_value: unknown;
+  source: string;
+  observation_id?: string;
+  timestamp?: string;
+}
+
+export interface PredictionAssessment {
+  request_id: string;
+  target_username: string;
+  predicted_class: 'fake' | 'genuine';
+  fake_probability: number;
+  score_label: string;
+  decision_threshold: number;
+  model_id: string;
+  pipeline_version: string;
+  verification_status: 'PROVISIONAL' | 'APPROVED';
+  verification_note: string;
+  feature_coverage_ratio: number;
+  missing_features: string[];
+  extracted_features: Record<string, number>;
+  evidence: EvidenceItem[];
+  explanation: ExplanationResult;
+  warnings: string[];
+  created_at: string;
+  processing_time_ms: number;
+}
+
+export type PredictionResponse = ApiSuccessResponse<PredictionAssessment>;
+
