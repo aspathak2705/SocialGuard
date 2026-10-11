@@ -1,0 +1,27 @@
+{
+  "pipeline_name": "SocialGuard-Phase4-ML",
+  "dataset_root": "C:\\Users\\athar\\OneDrive\\Documents\\projects\\SocialGuard\\Datasets",
+  "random_seed": 42,
+  "train_ratio": 0.70,
+  "val_ratio": 0.15,
+  "test_ratio": 0.15,
+  "models": [
+    "logistic_regression",
+    "random_forest",
+    "xgboost"
+  ],
+  "target_column": "is_fake",
+  "selected_features": [
+    "profile_pic",
+    "nums_length_username",
+    "fullname_words",
+    "nums_length_fullname",
+    "name_equals_username",
+    "description_length",
+    "external_url",
+    "private",
+    "posts",
+    "followers",
+    "follows"
+  ]
+}

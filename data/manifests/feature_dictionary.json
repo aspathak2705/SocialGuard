@@ -1,0 +1,102 @@
+{
+  "dataset_metadata": {
+    "project": "SocialGuard",
+    "phase": "Phase 4 - Feature Engineering & ML Pipeline",
+    "target_column": "is_fake",
+    "target_encoding": {
+      "0": "genuine / real account",
+      "1": "fake / suspicious / inauthentic account"
+    }
+  },
+  "features": {
+    "profile_pic": {
+      "type": "binary (0 or 1)",
+      "description": "Indicates whether the account has an avatar / profile picture uploaded.",
+      "provenance": "Observed metadata from Instagram profile",
+      "missingness_policy": "Default to 0 if not returned"
+    },
+    "nums_length_username": {
+      "type": "float [0.0, 1.0]",
+      "description": "Ratio of numeric digits to total character length in username.",
+      "formula": "count(digits in username) / length(username)",
+      "provenance": "Derived from username string"
+    },
+    "fullname_words": {
+      "type": "integer >= 0",
+      "description": "Total word token count in account full name field.",
+      "formula": "count(words in fullname)",
+      "provenance": "Derived from full_name string"
+    },
+    "nums_length_fullname": {
+      "type": "float [0.0, 1.0]",
+      "description": "Ratio of numeric digits to total character length in full name.",
+      "formula": "count(digits in fullname) / max(1, length(fullname))",
+      "provenance": "Derived from full_name string"
+    },
+    "name_equals_username": {
+      "type": "binary (0 or 1)",
+      "description": "Indicates whether full name strictly equals username.",
+      "provenance": "Derived"
+    },
+    "description_length": {
+      "type": "integer >= 0",
+      "description": "Total character length of account biography.",
+      "provenance": "Observed metadata"
+    },
+    "external_url": {
+      "type": "binary (0 or 1)",
+      "description": "Indicates presence of an external URL link in profile bio.",
+      "provenance": "Observed metadata"
+    },
+    "private": {
+      "type": "binary (0 or 1)",
+      "description": "Indicates whether the profile is locked / private.",
+      "provenance": "Observed metadata"
+    },
+    "posts": {
+      "type": "integer >= 0",
+      "description": "Total number of posts published.",
+      "provenance": "Observed public count"
+    },
+    "followers": {
+      "type": "integer >= 0",
+      "description": "Total follower count.",
+      "provenance": "Observed public count"
+    },
+    "follows": {
+      "type": "integer >= 0",
+      "description": "Total accounts followed (following count).",
+      "provenance": "Observed public count"
+    },
+    "follower_following_ratio": {
+      "type": "float >= 0.0",
+      "description": "Ratio of followers to accounts followed.",
+      "formula": "followers / (follows + 1.0)",
+      "provenance": "Derived ratio"
+    },
+    "following_follower_ratio": {
+      "type": "float >= 0.0",
+      "description": "Ratio of accounts followed to followers (high values indicate follow-churn).",
+      "formula": "follows / (followers + 1.0)",
+      "provenance": "Derived ratio"
+    },
+    "total_visible_connections": {
+      "type": "integer >= 0",
+      "description": "Sum of total followers and follows.",
+      "formula": "followers + follows",
+      "provenance": "Derived network size"
+    },
+    "followers_per_media": {
+      "type": "float >= 0.0",
+      "description": "Audience reach per posted media item.",
+      "formula": "followers / (posts + 1.0)",
+      "provenance": "Derived engagement density"
+    },
+    "following_minus_followers": {
+      "type": "integer",
+      "description": "Differential between followings and followers.",
+      "formula": "follows - followers",
+      "provenance": "Derived signal"
+    }
+  }
+}

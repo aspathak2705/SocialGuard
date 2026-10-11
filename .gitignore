@@ -50,3 +50,6 @@ dist-ssr/
 Thumbs.db
 docs
 tests
+reports
+scripts
+artifacts

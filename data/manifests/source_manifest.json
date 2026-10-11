@@ -1,0 +1,152 @@
+[
+  {
+    "file_name": "fakeAccountData.json",
+    "path": "C:\\Users\\athar\\OneDrive\\Documents\\projects\\SocialGuard\\Datasets\\fakeAccountData.json",
+    "size_bytes": 40874,
+    "sha256": "a3da0b2937ad8b05d032dc7b4c3115f927afa0d9dc85749dfe9db82a017b83d8",
+    "rows": 200,
+    "columns": [
+      "userFollowerCount",
+      "userFollowingCount",
+      "userBiographyLength",
+      "userMediaCount",
+      "userHasProfilPic",
+      "userIsPrivate",
+      "usernameDigitCount",
+      "usernameLength",
+      "isFake"
+    ]
+  },
+  {
+    "file_name": "fake_social_media.csv",
+    "path": "C:\\Users\\athar\\OneDrive\\Documents\\projects\\SocialGuard\\Datasets\\fake_social_media.csv",
+    "size_bytes": 295265,
+    "sha256": "c6c9cd07f994d83016c6cb4b34fc4e924acfeaae5bbee43966c2465b1675ab98",
+    "rows": 3000,
+    "columns": [
+      "platform",
+      "has_profile_pic",
+      "bio_length",
+      "username_randomness",
+      "followers",
+      "following",
+      "follower_following_ratio",
+      "account_age_days",
+      "posts",
+      "posts_per_day",
+      "caption_similarity_score",
+      "content_similarity_score",
+      "follow_unfollow_rate",
+      "spam_comments_rate",
+      "generic_comment_rate",
+      "suspicious_links_in_bio",
+      "verified",
+      "is_fake"
+    ]
+  },
+  {
+    "file_name": "NewDataset.csv",
+    "path": "C:\\Users\\athar\\OneDrive\\Documents\\projects\\SocialGuard\\Datasets\\NewDataset.csv",
+    "size_bytes": 46309,
+    "sha256": "e44193a15872eb5b4e935924b0cc0508324bd0480204932113a14f27568dce63",
+    "rows": 1000,
+    "columns": [
+      "Profile Pic",
+      "Nums/Length Username",
+      "Full Name Words",
+      "Bio Length",
+      "External Url",
+      "Verified",
+      "Business",
+      "#Posts",
+      "#Followers",
+      "#Following",
+      "Last Post Recent",
+      "%Post Single Day",
+      "Index of Activity",
+      "Average of Likes",
+      "Fake"
+    ]
+  },
+  {
+    "file_name": "OldDataSet.csv",
+    "path": "C:\\Users\\athar\\OneDrive\\Documents\\projects\\SocialGuard\\Datasets\\OldDataSet.csv",
+    "size_bytes": 43756,
+    "sha256": "6d64c6f918dc9f2cf4b339ade909ad6d487f5b9474ab2ae5a970ad4bae19159b",
+    "rows": 1400,
+    "columns": [
+      "Profile Pic",
+      "Nums/Length Username",
+      "Full Name Words",
+      "Bio Length",
+      "External Url",
+      "Private",
+      "Verified",
+      "Business",
+      "#Posts",
+      "#Followers",
+      "#Following",
+      "Fake"
+    ]
+  },
+  {
+    "file_name": "realAccountData.json",
+    "path": "C:\\Users\\athar\\OneDrive\\Documents\\projects\\SocialGuard\\Datasets\\realAccountData.json",
+    "size_bytes": 204941,
+    "sha256": "3f66e6aceda0ef71a2c0f40244359ce5abcde4d9de76778057b0c3fb4409a627",
+    "rows": 994,
+    "columns": [
+      "userFollowerCount",
+      "userFollowingCount",
+      "userBiographyLength",
+      "userMediaCount",
+      "userHasProfilPic",
+      "userIsPrivate",
+      "usernameDigitCount",
+      "usernameLength",
+      "isFake"
+    ]
+  },
+  {
+    "file_name": "test.csv",
+    "path": "C:\\Users\\athar\\OneDrive\\Documents\\projects\\SocialGuard\\Datasets\\test.csv",
+    "size_bytes": 3932,
+    "sha256": "4d09fc192c9f9736993635119670b724861b0d6da9ca512281c404eac79fc29d",
+    "rows": 120,
+    "columns": [
+      "profile pic",
+      "nums/length username",
+      "fullname words",
+      "nums/length fullname",
+      "name==username",
+      "description length",
+      "external URL",
+      "private",
+      "#posts",
+      "#followers",
+      "#follows",
+      "fake"
+    ]
+  },
+  {
+    "file_name": "train.csv",
+    "path": "C:\\Users\\athar\\OneDrive\\Documents\\projects\\SocialGuard\\Datasets\\train.csv",
+    "size_bytes": 18733,
+    "sha256": "54adc145282c4bbd3699e879c1c072fec3728dbaf141b007b33e457cd78b638a",
+    "rows": 576,
+    "columns": [
+      "profile pic",
+      "nums/length username",
+      "fullname words",
+      "nums/length fullname",
+      "name==username",
+      "description length",
+      "external URL",
+      "private",
+      "#posts",
+      "#followers",
+      "#follows",
+      "fake"
+    ]
+  }
+]
