@@ -112,8 +112,24 @@ class ModelService:
                 )
             )
 
-        # Compute Explanations
-        explanation = self._compute_explanation(X_input, feature_result.features)
+        # Compute Explanations using ExplanationService (OpenRouter Nemotron + Deterministic Fallback)
+        raw_contribs, raw_status, method_str, warning_msg = self._compute_raw_contributions(X_input, feature_result.features)
+
+        from app.services.explanation_service import ExplanationService
+        explanation = ExplanationService.generate_explanation(
+            target_username=username,
+            predicted_class=predicted_class,
+            fake_probability=round(fake_prob, 4),
+            decision_threshold=0.5,
+            verification_status=self.verification_status,
+            feature_coverage_ratio=round(feature_result.coverage_ratio, 2),
+            missing_features=feature_result.missing_features,
+            features_dict=feature_result.features,
+            contributions=raw_contribs,
+            raw_status=raw_status,
+            method=method_str,
+            warning_msg=warning_msg,
+        )
 
         verification_note = (
             "PROVISIONAL STATUS: Model evaluation reproduced against holdout with zero discrepancy "
@@ -141,11 +157,11 @@ class ModelService:
             processing_time_ms=processing_time_ms,
         )
 
-    def _compute_explanation(
+    def _compute_raw_contributions(
         self,
         X_input: pd.DataFrame,
         features_dict: Dict[str, float],
-    ) -> ExplanationResult:
+    ) -> Tuple[List[FeatureContribution], str, str, Optional[str]]:
         if self.explainer is not None:
             try:
                 shap_res = self.explainer(X_input)
@@ -169,14 +185,7 @@ class ModelService:
 
                 # Sort by absolute contribution magnitude
                 contributions.sort(key=lambda x: abs(x.contribution), reverse=True)
-                top_drivers = [c.feature_name for c in contributions[:5]]
-
-                return ExplanationResult(
-                    status="available",
-                    method="Local SHAP Tree Attribution",
-                    contributions=contributions[:10],
-                    top_drivers=top_drivers,
-                )
+                return contributions, "available", "Local SHAP Tree Attribution", None
             except Exception as e:
                 logger.warning(f"Error computing local SHAP: {e}")
 
@@ -195,21 +204,17 @@ class ModelService:
                     contribution=round(float(imp), 4),
                     direction="fake" if features_dict.get(f, 0.0) > 0 else "genuine",
                 )
-                for f, imp in ranked[:10]
+                for f, imp in ranked
             ]
-            return ExplanationResult(
-                status="fallback",
-                method="Global Feature Importance Fallback",
-                contributions=fallback_contribs,
-                top_drivers=[f for f, _ in ranked[:5]],
-                warning="Local SHAP unavailable; displaying top global model split importances.",
+            return (
+                fallback_contribs,
+                "fallback",
+                "Global Feature Importance Fallback",
+                "Local SHAP unavailable; displaying top global model split importances.",
             )
 
-        return ExplanationResult(
-            status="unavailable",
-            method="None",
-            warning="Model explainability provider unavailable for this inference pass.",
-        )
+        return [], "unavailable", "None", "Model explainability provider unavailable for this inference pass."
 
 
 model_service = ModelService()
+

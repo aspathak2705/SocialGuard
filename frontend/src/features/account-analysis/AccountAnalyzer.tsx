@@ -360,22 +360,76 @@ export const AccountAnalyzer: React.FC = () => {
               </div>
             </div>
 
-            {/* Explainability Panel (Local SHAP) */}
+            {/* Explainability Panel (Human-Readable + Local SHAP) */}
             <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: 'var(--border-thin)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <h4 style={{ margin: 0, textTransform: 'uppercase', fontSize: '0.9rem' }}>
-                  Local Feature Attributions (SHAP Explanations)
+                  Explainability & Factor Attribution
                 </h4>
-                <span className="neo-evidence-badge neo-badge-purple">
-                  {prediction.explanation.status.toUpperCase()}
-                </span>
+                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                  <span
+                    className="neo-evidence-badge"
+                    style={{
+                      backgroundColor:
+                        prediction.explanation.provider === 'openrouter_nemotron'
+                          ? 'var(--color-lime)'
+                          : prediction.explanation.provider === 'deterministic_fallback'
+                          ? 'var(--color-amber)'
+                          : '#e5e7eb',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {prediction.explanation.provider === 'openrouter_nemotron'
+                      ? 'AI-GENERATED EXPLANATION (NEMOTRON)'
+                      : prediction.explanation.provider === 'deterministic_fallback'
+                      ? 'DETERMINISTIC EXPLANATION'
+                      : prediction.explanation.provider === 'evidence_only'
+                      ? 'EVIDENCE SUMMARY'
+                      : 'EXPLANATION UNAVAILABLE'}
+                  </span>
+                  <span className="neo-evidence-badge neo-badge-purple">
+                    {prediction.explanation.status.toUpperCase()}
+                  </span>
+                </div>
               </div>
+
+              {/* Natural Language Synthesis Box */}
+              {prediction.explanation.summary && (
+                <div
+                  style={{
+                    backgroundColor: 'var(--color-offwhite)',
+                    border: 'var(--border-thin)',
+                    padding: '0.85rem 1rem',
+                    marginBottom: '1rem',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.25rem', textTransform: 'uppercase' }}>
+                    Executive Synthesis
+                  </div>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>
+                    {prediction.explanation.summary}
+                  </div>
+                </div>
+              )}
+
+              {/* Conflicting Signals Alert */}
+              {prediction.explanation.conflicting_signals && prediction.explanation.conflicting_signals.length > 0 && (
+                <div style={{ backgroundColor: '#fef3c7', border: '1px solid #f59e0b', padding: '0.6rem 0.8rem', marginBottom: '0.75rem', fontSize: '0.8rem' }}>
+                  <strong>Contradicting Signals:</strong> {prediction.explanation.conflicting_signals.join(' ')}
+                </div>
+              )}
+
               {prediction.explanation.warning && (
                 <p style={{ fontSize: '0.75rem', color: '#b45309', margin: '0.25rem 0 0.75rem' }}>
                   {prediction.explanation.warning}
                 </p>
               )}
 
+              {/* Verified Feature Attribution Breakdown */}
+              <div style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>
+                Verified Feature Attributions (Fake vs Genuine Direction)
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {prediction.explanation.contributions.map((c) => (
                   <div
@@ -390,12 +444,17 @@ export const AccountAnalyzer: React.FC = () => {
                     }}
                   >
                     <div>
-                      <strong style={{ fontSize: '0.85rem' }}>{c.feature_name}</strong>
+                      <strong style={{ fontSize: '0.85rem' }}>{c.display_name || c.feature_name}</strong>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
-                        (val: {c.feature_value})
+                        ({c.feature_name}: {c.feature_value})
                       </span>
+                      {c.description && (
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                          {c.description}
+                        </div>
+                      )}
                     </div>
-                    <div style={{ textAlign: 'right' }}>
+                    <div style={{ textAlign: 'right', minWidth: '110px' }}>
                       <span
                         style={{
                           fontWeight: 700,
@@ -406,13 +465,41 @@ export const AccountAnalyzer: React.FC = () => {
                         {c.contribution > 0 ? `+${c.contribution}` : c.contribution}
                       </span>
                       <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: '0.35rem' }}>
-                        → {c.direction}
+                        → {c.direction.toUpperCase()}
                       </span>
                     </div>
                   </div>
                 ))}
               </div>
+
+              {/* Review Guidance & Limitations */}
+              {((prediction.explanation.limitations && prediction.explanation.limitations.length > 0) ||
+                (prediction.explanation.review_guidance && prediction.explanation.review_guidance.length > 0)) && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.75rem', marginTop: '1rem' }}>
+                  {prediction.explanation.limitations && prediction.explanation.limitations.length > 0 && (
+                    <div style={{ border: 'var(--border-thin)', padding: '0.6rem 0.8rem', backgroundColor: '#f9fafb', fontSize: '0.75rem' }}>
+                      <strong>Assessment Limitations:</strong>
+                      <ul style={{ paddingLeft: '1.1rem', marginTop: '0.3rem' }}>
+                        {prediction.explanation.limitations.map((lim, idx) => (
+                          <li key={idx}>{lim}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {prediction.explanation.review_guidance && prediction.explanation.review_guidance.length > 0 && (
+                    <div style={{ border: 'var(--border-thin)', padding: '0.6rem 0.8rem', backgroundColor: '#f9fafb', fontSize: '0.75rem' }}>
+                      <strong>Investigator Review Steps:</strong>
+                      <ul style={{ paddingLeft: '1.1rem', marginTop: '0.3rem' }}>
+                        {prediction.explanation.review_guidance.map((step, idx) => (
+                          <li key={idx}>{step}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
+
 
             {/* Evidence & Provenance Explorer */}
             {prediction.evidence.length > 0 && (

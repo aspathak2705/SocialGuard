@@ -1,8 +1,12 @@
 import time
 import uuid
+import logging
 from typing import Optional
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
+
 
 from app.schemas.account import (
     AccountTarget,
@@ -125,7 +129,17 @@ async def analyze_account_prediction(request: PredictAccountRequest) -> PredictR
         processing_time_ms=elapsed_ms,
     )
 
+    # 6. Durable Persistence of Assessment and Explanation
+    try:
+        from app.db.session import SessionLocal
+        from app.db.repositories import AssessmentRepository
+        with SessionLocal() as db:
+            AssessmentRepository.save_assessment(db, assessment, run_id=unified_run.run_id)
+    except Exception as e:
+        logger.warning(f"Could not persist assessment to database: {e}")
+
     return PredictResponse(
         success=True,
         data=assessment,
     )
+

@@ -163,16 +163,33 @@ export interface FeatureContribution {
   feature_value: number;
   contribution: number;
   direction: 'fake' | 'genuine';
+  display_name?: string;
   description?: string;
 }
 
+export interface KeyFactor {
+  feature_name: string;
+  display_name: string;
+  direction: string;
+  contribution_value: number;
+  explanation: string;
+}
+
 export interface ExplanationResult {
-  status: 'available' | 'fallback' | 'unavailable';
+  status: 'available' | 'fallback' | 'evidence_only' | 'unavailable';
+  provider: 'openrouter_nemotron' | 'deterministic_fallback' | 'evidence_only' | 'unavailable';
+  model_id: string;
   method: string;
+  summary: string;
+  key_factors?: KeyFactor[];
+  conflicting_signals?: string[];
+  limitations?: string[];
+  review_guidance?: string[];
   contributions: FeatureContribution[];
   top_drivers: string[];
   warning?: string;
 }
+
 
 export interface EvidenceItem {
   field_name: string;

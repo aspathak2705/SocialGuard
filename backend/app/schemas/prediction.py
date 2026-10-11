@@ -8,15 +8,32 @@ class FeatureContribution(BaseModel):
     feature_value: float
     contribution: float = Field(..., description="SHAP attribution for target class")
     direction: str = Field(..., description="'fake' or 'genuine' alignment")
+    display_name: Optional[str] = None
     description: Optional[str] = None
 
 
+class KeyFactor(BaseModel):
+    feature_name: str
+    display_name: str
+    direction: str
+    contribution_value: float
+    explanation: str
+
+
 class ExplanationResult(BaseModel):
-    status: str = Field(..., description="'available', 'fallback', or 'unavailable'")
+    status: str = Field(..., description="'available', 'fallback', 'evidence_only', or 'unavailable'")
+    provider: str = Field(default="deterministic", description="'openrouter_nemotron', 'deterministic_fallback', 'evidence_only', 'unavailable'")
+    model_id: str = Field(default="SHAP Explainer", description="Model/method identifier")
     method: str = Field(default="SHAP Explainer", description="Attribution algorithm")
+    summary: str = Field(default="", description="Plain-language human-readable synthesis")
+    key_factors: List[KeyFactor] = Field(default_factory=list)
+    conflicting_signals: List[str] = Field(default_factory=list)
+    limitations: List[str] = Field(default_factory=list)
+    review_guidance: List[str] = Field(default_factory=list)
     contributions: List[FeatureContribution] = Field(default_factory=list)
     top_drivers: List[str] = Field(default_factory=list)
     warning: Optional[str] = None
+
 
 
 class EvidenceItem(BaseModel):

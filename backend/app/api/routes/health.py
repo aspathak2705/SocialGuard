@@ -36,20 +36,32 @@ async def get_health() -> HealthResponse:
 async def get_readiness() -> ReadinessResponse:
     """
     Readiness probe indicating application status.
-    Reports Phase 2 multi-source collectors initialized and ready.
+    Reports real database connectivity, pipeline readiness, and ML model status.
     """
+    from app.db.session import check_db_connectivity
+    from app.ml.model_service import model_service
+
+    db_ready = check_db_connectivity()
+    model_ready = model_service.is_ready() if model_service.is_loaded else False
+    llm_enabled = bool(settings.OPENROUTER_ENABLED and settings.OPENROUTER_API_KEY)
+
+    subsystems = {
+        "api_foundation": "ready",
+        "account_validation": "ready",
+        "collectors": "ready_phase_2",
+        "orchestrator": "ready_phase_2",
+        "pipeline": "ready_phase_3",
+        "database": "connected" if db_ready else "unreachable",
+        "ml_inference": "ready" if model_ready else "standby",
+        "openrouter_llm": "configured" if llm_enabled else "unconfigured_fallback",
+    }
+
+    is_overall_ready = db_ready
+
     return ReadinessResponse(
-        status="ready",
-        ready=True,
-        phase="Phase 3: Unified Data Pipeline & Validation",
-        subsystems={
-            "api_foundation": "ready",
-            "account_validation": "ready",
-            "collectors": "ready_phase_2",
-            "orchestrator": "ready_phase_2",
-            "pipeline": "ready_phase_3",
-            "feature_pipeline": "planned_phase_4",
-            "ml_inference": "planned_phase_4",
-            "database": "uninitialized_stateless",
-        },
+        status="ready" if is_overall_ready else "degraded",
+        ready=is_overall_ready,
+        phase="Phase 5: Investigation System",
+        subsystems=subsystems,
     )
+

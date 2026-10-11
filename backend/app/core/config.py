@@ -23,6 +23,21 @@ class Settings(BaseSettings):
     OVERALL_ACQUISITION_TIMEOUT_SECONDS: float = 25.0
     MAX_CONCURRENT_COLLECTORS: int = 3
 
+    # Database Configuration (Supabase PostgreSQL / Local PostgreSQL / SQLite fallback)
+    DATABASE_URL: str = "sqlite:///./socialguard.db"
+    DATABASE_SSL_MODE: str = "prefer"
+    DATABASE_POOL_SIZE: int = 5
+    DATABASE_MAX_OVERFLOW: int = 10
+
+    # OpenRouter LLM Configuration
+    OPENROUTER_ENABLED: bool = True
+    OPENROUTER_API_KEY: str = ""
+    OPENROUTER_MODEL: str = "nvidia/nemotron-3.5-lightning"
+    OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
+    OPENROUTER_TIMEOUT_SECONDS: float = 15.0
+    OPENROUTER_MAX_TOKENS: int = 600
+    OPENROUTER_TEMPERATURE: float = 0.2
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -32,3 +47,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
