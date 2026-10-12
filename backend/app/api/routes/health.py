@@ -45,13 +45,16 @@ async def get_readiness() -> ReadinessResponse:
     model_ready = model_service.is_ready() if model_service.is_loaded else False
     llm_enabled = bool(settings.OPENROUTER_ENABLED and settings.OPENROUTER_API_KEY)
 
+    db_backend = settings.DATABASE_BACKEND
+    db_status = f"{db_backend}_connected" if db_ready else f"{db_backend}_unreachable"
+
     subsystems = {
         "api_foundation": "ready",
         "account_validation": "ready",
         "collectors": "ready_phase_2",
         "orchestrator": "ready_phase_2",
         "pipeline": "ready_phase_3",
-        "database": "connected" if db_ready else "unreachable",
+        "database": db_status if db_ready else "unreachable",
         "ml_inference": "ready" if model_ready else "standby",
         "openrouter_llm": "configured" if llm_enabled else "unconfigured_fallback",
     }
