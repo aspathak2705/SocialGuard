@@ -38,6 +38,6 @@ async def validate_account(request: AccountTargetValidateRequest) -> AccountVali
         data=AccountValidateResponseData(
             is_valid=True,
             target=target,
-            message="Target is syntactically valid. Account data collection is planned for Phase 2.",
+            message="Target is syntactically valid and ready for investigation.",
         ),
     )

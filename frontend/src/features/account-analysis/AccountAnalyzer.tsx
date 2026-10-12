@@ -13,97 +13,83 @@ import type {
 
 export const AccountAnalyzer: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validatedTarget, setValidatedTarget] = useState<AccountTarget | null>(null);
-  const [serverMessage, setServerMessage] = useState<string | null>(null);
 
-  // Phase 3 Unified Pipeline States
-  const [isProcessing, setIsProcessing] = useState(false);
+  // Investigation States
+  const [investigationStep, setInvestigationStep] = useState<string | null>(null);
   const [pipelineRun, setPipelineRun] = useState<UnifiedCollectionRun | null>(null);
-  const [pipelineError, setPipelineError] = useState<string | null>(null);
-
-  // Phase 5 ML Inference States
-  const [isPredicting, setIsPredicting] = useState(false);
   const [prediction, setPrediction] = useState<PredictionAssessment | null>(null);
-  const [predictionError, setPredictionError] = useState<string | null>(null);
+  const [investigationError, setInvestigationError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const isInvestigating = Boolean(investigationStep);
+
+  const handleInvestigate = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = inputValue.trim();
 
     if (!trimmed) {
       setError('Please enter an Instagram username or profile URL.');
       setValidatedTarget(null);
-      setServerMessage(null);
       setPipelineRun(null);
       setPrediction(null);
       return;
     }
 
-    setIsLoading(true);
     setError(null);
     setValidatedTarget(null);
-    setServerMessage(null);
     setPipelineRun(null);
-    setPipelineError(null);
     setPrediction(null);
-    setPredictionError(null);
+    setInvestigationError(null);
 
+    // Step 1: Validating Account
+    setInvestigationStep('Validating account...');
+    let targetObj: AccountTarget;
     try {
-      const response = await validateAccountTarget(trimmed);
-      setValidatedTarget(response.data.target);
-      setServerMessage(response.data.message);
+      const valRes = await validateAccountTarget(trimmed);
+      targetObj = valRes.data.target;
+      setValidatedTarget(targetObj);
     } catch (err: unknown) {
+      setInvestigationStep(null);
       if (err instanceof ApiServiceError) {
         setError(err.message);
       } else {
-        setError('An unexpected error occurred while communicating with the server.');
+        setError('An unexpected error occurred while validating target syntax.');
       }
-    } finally {
-      setIsLoading(false);
+      return;
     }
-  };
 
-  const handleStartPipeline = async () => {
-    if (!validatedTarget) return;
-
-    setIsProcessing(true);
-    setPipelineError(null);
-    setPipelineRun(null);
-
+    // Step 2: Collecting Available Evidence & Normalizing Pipeline
+    setInvestigationStep('Collecting available evidence & normalizing observations...');
+    let currentRun: UnifiedCollectionRun | null = null;
     try {
-      const res = await processPipelineData(validatedTarget.original_input);
-      setPipelineRun(res.data);
+      const pipeRes = await processPipelineData(targetObj.original_input);
+      currentRun = pipeRes.data;
+      setPipelineRun(currentRun);
     } catch (err: unknown) {
+      // If collection completely fails, record error and halt
+      setInvestigationStep(null);
       if (err instanceof ApiServiceError) {
-        setPipelineError(err.message);
+        setInvestigationError(`Data collection failed: ${err.message}`);
       } else {
-        setPipelineError('Unexpected error occurred during pipeline execution.');
+        setInvestigationError('Unexpected error during evidence acquisition.');
       }
-    } finally {
-      setIsProcessing(false);
+      return;
     }
-  };
 
-  const handleRunPrediction = async () => {
-    if (!validatedTarget) return;
-
-    setIsPredicting(true);
-    setPredictionError(null);
-    setPrediction(null);
-
+    // Step 3: Preparing Account Features & Running ML Assessment & SHAP Explanation
+    setInvestigationStep('Extracting features, evaluating model, and generating explanations...');
     try {
-      const res = await predictAccountInference(validatedTarget.normalized_username);
-      setPrediction(res.data);
+      const predRes = await predictAccountInference(targetObj.normalized_username);
+      setPrediction(predRes.data);
+      setInvestigationStep(null);
     } catch (err: unknown) {
+      setInvestigationStep(null);
       if (err instanceof ApiServiceError) {
-        setPredictionError(err.message);
+        setInvestigationError(err.message);
       } else {
-        setPredictionError('Unexpected error during model inference execution.');
+        setInvestigationError('Unexpected error during model inference and assessment.');
       }
-    } finally {
-      setIsPredicting(false);
     }
   };
 
@@ -124,7 +110,7 @@ export const AccountAnalyzer: React.FC = () => {
 
   return (
     <div className="neo-card" id="analyze-section">
-      <form onSubmit={handleSubmit} noValidate>
+      <form onSubmit={handleInvestigate} noValidate>
         <div className="neo-form-group">
           <label htmlFor="account-target-input" className="neo-form-label">
             Target Account (Username or Profile URL)
@@ -137,7 +123,7 @@ export const AccountAnalyzer: React.FC = () => {
               placeholder="e.g. johndoe or https://www.instagram.com/johndoe/"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              disabled={isLoading || isProcessing || isPredicting}
+              disabled={isInvestigating}
               aria-describedby="target-input-hint"
               autoComplete="off"
               spellCheck="false"
@@ -145,9 +131,9 @@ export const AccountAnalyzer: React.FC = () => {
             <button
               type="submit"
               className="neo-submit-btn"
-              disabled={isLoading || isProcessing || isPredicting || !inputValue.trim()}
+              disabled={isInvestigating || !inputValue.trim()}
             >
-              {isLoading ? 'Validating...' : 'Analyze'}
+              {isInvestigating ? 'Investigating...' : 'INVESTIGATE ACCOUNT'}
             </button>
           </div>
           <p id="target-input-hint" className="neo-form-hint">
@@ -156,9 +142,19 @@ export const AccountAnalyzer: React.FC = () => {
         </div>
       </form>
 
-      {/* Error Presentation */}
+      {/* Progressive Step / Status Banner */}
+      {investigationStep && (
+        <div className="neo-alert neo-alert-info animate-entrance" style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <span className="neo-trust-dot" style={{ animation: 'pulse 1.5s infinite' }}></span>
+          <span style={{ fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+            STATUS: {investigationStep}
+          </span>
+        </div>
+      )}
+
+      {/* Target Validation Error */}
       {error && (
-        <div className="neo-alert neo-alert-error" role="alert">
+        <div className="neo-alert neo-alert-error animate-entrance" role="alert" style={{ marginTop: '1rem' }}>
           <div className="neo-alert-title">Target Validation Failed</div>
           <p>{error}</p>
         </div>
@@ -166,9 +162,8 @@ export const AccountAnalyzer: React.FC = () => {
 
       {/* Target Validated Presentation */}
       {validatedTarget && (
-        <div className="neo-alert neo-alert-success animate-entrance" role="status">
-          <div className="neo-alert-title">Target Validated Successfully</div>
-          <p>{serverMessage}</p>
+        <div className="neo-alert neo-alert-success animate-entrance" role="status" style={{ marginTop: '1rem' }}>
+          <div className="neo-alert-title">Target Validated</div>
           <div className="neo-target-details">
             <div>
               <span>Normalized Username:</span> @{validatedTarget.normalized_username}
@@ -188,44 +183,26 @@ export const AccountAnalyzer: React.FC = () => {
               </a>
             </div>
           </div>
+        </div>
+      )}
 
-          {/* Action Trigger Buttons */}
-          <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: 'var(--border-thin)', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <button
-              onClick={handleStartPipeline}
-              className="neo-btn-secondary"
-              disabled={isProcessing || isPredicting}
-              style={{ padding: '0.65rem 1.25rem', fontSize: '0.85rem' }}
-            >
-              {isProcessing ? 'Processing Unified Pipeline...' : 'Run Phase 3 Unified Pipeline →'}
-            </button>
-            <button
-              onClick={handleRunPrediction}
-              className="neo-btn-primary"
-              disabled={isProcessing || isPredicting}
-              style={{ padding: '0.65rem 1.25rem', fontSize: '0.85rem' }}
-            >
-              {isPredicting ? 'Executing Inference & SHAP...' : 'Run Phase 5 AI Inference →'}
-            </button>
-          </div>
+      {/* Investigation Error */}
+      {investigationError && (
+        <div className="neo-alert neo-alert-error animate-entrance" role="alert" style={{ marginTop: '1.25rem' }}>
+          <div className="neo-alert-title">Investigation Notice</div>
+          <p>{investigationError}</p>
         </div>
       )}
 
 
-      {/* Pipeline Error */}
-      {pipelineError && (
-        <div className="neo-alert neo-alert-error animate-entrance" role="alert">
-          <div className="neo-alert-title">Pipeline Notice</div>
-          <p>{pipelineError}</p>
-        </div>
-      )}
 
-      {/* Phase 3 Unified Pipeline Results */}
+
+      {/* Unified Pipeline Results */}
       {pipelineRun && (
         <div className="neo-alert neo-alert-success animate-entrance" style={{ marginTop: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <div className="neo-alert-title" style={{ margin: 0 }}>
-              Pipeline Run: {pipelineRun.run_id} (v{pipelineRun.pipeline_version})
+              Collection & Evidence Summary: {pipelineRun.run_id}
             </div>
             <span className={`neo-evidence-badge ${getStatusBadgeClass(pipelineRun.overall_status)}`}>
               STATUS: {pipelineRun.overall_status.toUpperCase()}
@@ -283,15 +260,9 @@ export const AccountAnalyzer: React.FC = () => {
       )}
 
 
-      {/* Prediction Error */}
-      {predictionError && (
-        <div className="neo-alert neo-alert-error animate-entrance" role="alert" style={{ marginTop: '1.5rem' }}>
-          <div className="neo-alert-title">Inference Execution Error</div>
-          <p>{predictionError}</p>
-        </div>
-      )}
 
-      {/* Phase 5 Model Prediction & Investigation Dashboard */}
+
+      {/* Model Prediction & Investigation Dashboard */}
       {prediction && (
         <div className="neo-card animate-entrance" style={{ marginTop: '1.5rem', border: '3px solid #000' }}>
           {/* Provisional Banner */}

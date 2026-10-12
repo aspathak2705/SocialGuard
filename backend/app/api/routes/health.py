@@ -41,8 +41,11 @@ async def get_readiness() -> ReadinessResponse:
     from app.db.session import check_db_connectivity
     from app.ml.model_service import model_service
 
+    if not model_service.is_loaded:
+        model_service.initialize()
+    model_ready = model_service.is_ready()
+
     db_ready = check_db_connectivity()
-    model_ready = model_service.is_ready() if model_service.is_loaded else False
     llm_enabled = bool(settings.OPENROUTER_ENABLED and settings.OPENROUTER_API_KEY)
 
     db_backend = settings.DATABASE_BACKEND
@@ -55,11 +58,11 @@ async def get_readiness() -> ReadinessResponse:
         "orchestrator": "ready_phase_2",
         "pipeline": "ready_phase_3",
         "database": db_status if db_ready else "unreachable",
-        "ml_inference": "ready" if model_ready else "standby",
+        "ml_inference": "ready" if model_ready else "unready",
         "openrouter_llm": "configured" if llm_enabled else "unconfigured_fallback",
     }
 
-    is_overall_ready = db_ready
+    is_overall_ready = db_ready and model_ready
 
     return ReadinessResponse(
         status="ready" if is_overall_ready else "degraded",

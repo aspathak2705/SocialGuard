@@ -12,6 +12,15 @@ from app.core.errors import (
 )
 from app.api.routes import api_router
 
+from contextlib import asynccontextmanager
+from app.ml.model_service import model_service
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Eagerly initialize and validate ML model service on startup
+    model_service.initialize()
+    yield
+
 # Configure structured logging
 setup_logging()
 
@@ -21,6 +30,7 @@ app = FastAPI(
     description="Explainable Multi-Signal Instagram Fake Account Detection System - Backend API",
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
 # Exception handlers
