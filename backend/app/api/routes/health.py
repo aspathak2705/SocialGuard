@@ -61,7 +61,7 @@ async def get_readiness() -> ReadinessResponse:
     return ReadinessResponse(
         status="ready" if is_overall_ready else "degraded",
         ready=is_overall_ready,
-        phase="Phase 5: Investigation System",
+        phase="Phase 6: Release Candidate",
         subsystems=subsystems,
     )
 

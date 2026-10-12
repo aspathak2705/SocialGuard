@@ -27,6 +27,11 @@ def create_configured_engine():
             logger.info("Connected to configured PostgreSQL database.")
             return temp_engine
         except Exception as e:
+            if settings.DATABASE_REQUIRE_POSTGRES:
+                logger.error(f"DATABASE_REQUIRE_POSTGRES is True and PostgreSQL is unreachable: {e}")
+                raise RuntimeError(
+                    f"Hosted deployment requires PostgreSQL connectivity, but connection failed: {e}"
+                )
             logger.warning(
                 f"Configured PostgreSQL unreachable ({e}). Using local durable SQLite fallback 'socialguard.db'."
             )

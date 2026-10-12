@@ -112,8 +112,8 @@ async def analyze_account_prediction(request: PredictAccountRequest) -> PredictR
         observations=unified_run.canonical_observations,
     )
 
-    # Enforce minimum feature coverage policy (minimum 25% to prevent ungrounded inferences)
-    if feature_result.coverage_ratio < 0.25:
+    # Enforce minimum feature coverage policy (minimum 50% or at least basic count signals to prevent ungrounded inferences)
+    if not unified_run.canonical_observations or feature_result.coverage_ratio < 0.50:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Insufficient observation coverage ({feature_result.coverage_ratio * 100:.1f}%). Missing core signals: {', '.join(feature_result.missing_features)}.",
@@ -137,9 +137,75 @@ async def analyze_account_prediction(request: PredictAccountRequest) -> PredictR
             AssessmentRepository.save_assessment(db, assessment, run_id=unified_run.run_id)
     except Exception as e:
         logger.warning(f"Could not persist assessment to database: {e}")
+        assessment.warnings.append(
+            f"Persistence warning: Assessment computed successfully but could not be durably saved ({type(e).__name__})."
+        )
 
     return PredictResponse(
         success=True,
         data=assessment,
     )
+
+
+@router.get(
+    "/{request_id}",
+    response_model=PredictResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Retrieve a previously persisted prediction assessment by request_id",
+)
+async def get_assessment_by_id(request_id: str) -> PredictResponse:
+    from app.db.session import SessionLocal
+    from app.db.repositories import AssessmentRepository
+    from app.schemas.prediction import ExplanationResult, FeatureContribution, KeyFactor, EvidenceItem
+
+    with SessionLocal() as db:
+        record = AssessmentRepository.get_assessment(db, request_id)
+        if not record:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Assessment with request_id '{request_id}' not found.",
+            )
+
+        expl = record.explanation
+        explanation_obj = ExplanationResult(
+            status=expl.status if expl else "unavailable",
+            provider=expl.provider if expl else "unavailable",
+            model_id=expl.model if expl else "unknown",
+            method=expl.model if expl else "unknown",
+            summary=expl.summary if expl else "",
+            key_factors=[KeyFactor(**f) for f in (expl.key_factors or [])] if expl else [],
+            conflicting_signals=expl.conflicting_signals or [] if expl else [],
+            limitations=expl.limitations or [] if expl else [],
+            review_guidance=expl.review_guidance or [] if expl else [],
+            contributions=[FeatureContribution(**c) for c in (expl.raw_contributions or [])] if expl else [],
+            top_drivers=[c.get("feature_name", "") for c in (expl.raw_contributions or [])[:5]] if expl else [],
+            warning=expl.warning if expl else None,
+        )
+
+        assessment = PredictionAssessment(
+            request_id=record.request_id,
+            target_username=record.target_username,
+            predicted_class=record.predicted_class,
+            fake_probability=record.fake_probability,
+            score_label=record.score_label,
+            decision_threshold=record.decision_threshold,
+            model_id=record.model_id,
+            pipeline_version=record.pipeline_version,
+            verification_status=record.verification_status,
+            verification_note=record.verification_note,
+            feature_coverage_ratio=record.feature_coverage_ratio,
+            missing_features=record.missing_features or [],
+            extracted_features=record.extracted_features or {},
+            evidence=[EvidenceItem(**e) for e in (record.evidence or [])],
+            explanation=explanation_obj,
+            warnings=record.warnings or [],
+            processing_time_ms=record.processing_time_ms,
+            created_at=record.created_at,
+        )
+
+    return PredictResponse(
+        success=True,
+        data=assessment,
+    )
+
 

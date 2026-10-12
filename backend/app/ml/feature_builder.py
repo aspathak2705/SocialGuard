@@ -107,6 +107,14 @@ def extract_features_from_observations(
     if following_count is None:
         missing_features.append("follows")
         warnings.append("Following count unavailable from collectors; defaulting to 0.")
+    if has_profile_pic is None:
+        missing_features.append("profile_pic")
+    if biography is None:
+        missing_features.append("biography")
+    if external_url is None:
+        missing_features.append("external_url")
+    if is_private is None:
+        missing_features.append("private")
 
     # Calculate username properties
     clean_username = username.strip().lower()
@@ -171,8 +179,12 @@ def extract_features_from_observations(
         "log_posts": log_posts,
     }
 
+    # Total 7 raw observable features: posts, followers, follows, profile_pic, biography, external_url, private
+    core_raw_features = ["posts", "followers", "follows", "profile_pic", "biography", "external_url", "private"]
+    missing_core = [f for f in missing_features if f in core_raw_features]
+    coverage_ratio = 1.0 - (len(missing_core) / len(core_raw_features))
+
     feature_vector = [features[col] for col in MODEL_FEATURES]
-    coverage_ratio = 1.0 - (len(missing_features) / max(len(MODEL_FEATURES), 1))
 
     return FeatureExtractionResult(
         features=features,

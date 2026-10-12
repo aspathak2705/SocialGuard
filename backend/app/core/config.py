@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     DATABASE_SSL_MODE: str = "prefer"
     DATABASE_POOL_SIZE: int = 5
     DATABASE_MAX_OVERFLOW: int = 10
+    DATABASE_REQUIRE_POSTGRES: bool = False
+
 
     # OpenRouter LLM Configuration
     OPENROUTER_ENABLED: bool = True
