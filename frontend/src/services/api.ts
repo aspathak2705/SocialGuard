@@ -158,17 +158,24 @@ export async function processPipelineData(input: string): Promise<PipelineProces
   }
 }
 
-export async function predictAccountInference(username: string): Promise<import('../types/account').PredictionResponse> {
+export async function predictAccountInference(
+  username: string,
+  runId?: string
+): Promise<import('../types/account').PredictionResponse> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
+    const payload: { username: string; run_id?: string } = { username };
+    if (runId) {
+      payload.run_id = runId;
+    }
     const response = await fetch(`${API_BASE_URL}/predictions/analyze`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ username }),
+      body: JSON.stringify(payload),
       signal: controller.signal,
     });
 

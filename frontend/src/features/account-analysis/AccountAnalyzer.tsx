@@ -77,10 +77,38 @@ export const AccountAnalyzer: React.FC = () => {
       return;
     }
 
-    // Step 3: Preparing Account Features & Running ML Assessment & SHAP Explanation
+    // Step 3: Check Evidence Sufficiency before Model Execution
+    // Check if usable observations with core signals exist
+    const hasUsableProfileEvidence = currentRun.canonical_observations.some(
+      (obs) =>
+        obs.posts_count !== undefined ||
+        obs.followers_count !== undefined ||
+        obs.following_count !== undefined ||
+        obs.has_profile_pic !== undefined ||
+        obs.biography !== undefined ||
+        obs.external_url !== undefined
+    );
+
+    if (!hasUsableProfileEvidence || currentRun.canonical_observations.length === 0) {
+      setInvestigationStep(null);
+      const isBlocked = Object.values(currentRun.source_executions).some(
+        (s) => s.status === 'failed' || s.status === 'timed_out' || s.status === 'unavailable'
+      );
+      setInvestigationError(
+        isBlocked
+          ? 'Insufficient evidence for a defensible assessment: collectors were blocked, restricted, or returned no profile signals. Account cannot be classified as fake or genuine.'
+          : 'Insufficient observation coverage to produce a defensible assessment. Required profile signals were not returned.'
+      );
+      return;
+    }
+
+    // Step 4: Preparing Account Features & Running ML Assessment & SHAP Explanation
     setInvestigationStep('Extracting features, evaluating model, and generating explanations...');
     try {
-      const predRes = await predictAccountInference(targetObj.normalized_username);
+      const predRes = await predictAccountInference(
+        targetObj.normalized_username,
+        currentRun.run_id
+      );
       setPrediction(predRes.data);
       setInvestigationStep(null);
     } catch (err: unknown) {
@@ -199,7 +227,16 @@ export const AccountAnalyzer: React.FC = () => {
 
       {/* Unified Pipeline Results */}
       {pipelineRun && (
-        <div className="neo-alert neo-alert-success animate-entrance" style={{ marginTop: '1.5rem' }}>
+        <div
+          className={`neo-alert ${
+            pipelineRun.overall_status === 'completed'
+              ? 'neo-alert-success'
+              : pipelineRun.overall_status === 'partial'
+              ? 'neo-alert-info'
+              : 'neo-alert-error'
+          } animate-entrance`}
+          style={{ marginTop: '1.5rem' }}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <div className="neo-alert-title" style={{ margin: 0 }}>
               Collection & Evidence Summary: {pipelineRun.run_id}
@@ -234,6 +271,30 @@ export const AccountAnalyzer: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Collector Execution Breakdown */}
+          {pipelineRun.source_executions && Object.keys(pipelineRun.source_executions).length > 0 && (
+            <div style={{ marginTop: '0.75rem', paddingTop: '0.5rem', borderTop: 'var(--border-thin)' }}>
+              <strong style={{ fontSize: '0.75rem', textTransform: 'uppercase' }}>Collector Adapter Diagnostics:</strong>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.5rem', marginTop: '0.35rem' }}>
+                {Object.entries(pipelineRun.source_executions).map(([src, statusObj]) => (
+                  <div key={src} style={{ border: 'var(--border-thin)', padding: '0.4rem', backgroundColor: 'var(--color-white)', fontSize: '0.75rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <strong>{src}</strong>
+                      <span className={`neo-evidence-badge ${getStatusBadgeClass(statusObj.status)}`} style={{ fontSize: '0.65rem' }}>
+                        {statusObj.status.toUpperCase()}
+                      </span>
+                    </div>
+                    {statusObj.error_message && (
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginTop: '0.2rem' }}>
+                        {statusObj.error_message}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Canonical Observations Explorer */}
           {pipelineRun.canonical_observations.length > 0 && (
